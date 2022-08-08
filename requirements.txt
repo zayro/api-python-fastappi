@@ -1,0 +1,12 @@
+fastapi
+#typing 
+mariadb
+datetime 
+uuid
+PyJWT
+pydantic
+mypy
+uvicorn[standard]
+jinja2
+dotenv
+bcrypt
