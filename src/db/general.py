@@ -50,9 +50,8 @@ class Database:
                   
 
     def __del__(self):
-        print('Destructor called, Employee deleted.')
-        self.cursor.close()
-        self.conn.close() 
+        print('Destructor called')
+
         
     def connectar(self):       
         try: 
@@ -151,25 +150,3 @@ class Database:
             print(f"Error: {e}")
             # raise Exception("Error Sql")
             return [False, f"Error: {e}"]
-
-
-data = [{"nombre": "zayro",  "apellido": "gng", "info": '[{ "name" : "marlon" }]'},
-        {"nombre": "barajas",  "apellido": "fer",  "info": '[{ "name" : "marlon" }]'}]
-
-
-"""
-# Get Cursor
-
-sql = "SELECT username, ? FROM users where id_users =  ? "
-params = ('email', 1,)
-results = select(cur, sql, params)
-
-
-print("The variable, name is of type:", type(results))
-print(results)
-
-
-for res in results:
-    print(res)
-
-"""

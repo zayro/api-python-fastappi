@@ -3,10 +3,16 @@ from fastapi import FastAPI, Request, status
 
 from fastapi.encoders import jsonable_encoder
 from fastapi.exceptions import RequestValidationError
-from fastapi.responses import JSONResponse, PlainTextResponse
+from fastapi.responses import JSONResponse
 from starlette.exceptions import HTTPException as StarletteHTTPException
-import time
+from fastapi.staticfiles import StaticFiles
+
+# Routes
 from src.router.general import general
+from src.router.auth import auth
+from src.router.view import view
+
+
 
 app = FastAPI()
  
@@ -20,7 +26,7 @@ def shutdown_event():
         log.write("Application shutdown")
 
 
-
+app.mount("/public", StaticFiles(directory="public"), name="public")
 
 @app.exception_handler(RequestValidationError)
 async def validation_exception_handler(request: Request, exc: RequestValidationError):
@@ -38,7 +44,9 @@ async def http_exception_handler(request, exc):
         content=jsonable_encoder(exc.detail),
     )
 
+app.include_router(auth)
 app.include_router(general)
+app.include_router(view)
 
 
 

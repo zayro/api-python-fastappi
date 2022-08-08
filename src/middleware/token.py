@@ -1,30 +1,39 @@
-
-from fastapi import Request, HTTPException
-from src.controller.controllerToken import validate_token
-from fastapi.routing import APIRoute
-from fastapi.exceptions import RequestValidationError
-from fastapi.responses import JSONResponse
-
-class VerifyTokenRoute(APIRoute):
-    def get_route_handler(self):
-        original_route = super().get_route_handler()
-        
-        async def verify_token_middleware(request:Request):
-            try:
-                token = request.headers["Authorization"].split(" ")[1]
-                print(token)
-                print("---------------------------")
-                validation_response = validate_token(token, output=False)
-                print("---------------------------")
-                print(validation_response)
-                if validation_response == None:
-                    return await original_route(request)
-                else:
-                    return validation_response 
-            except RequestValidationError as exc:
-                body = await request.body()
-                detail = {"errors": exc.errors(), "body": body.decode()}
-                raise HTTPException(status_code=422, detail=detail)            
+from fastapi import  Depends, APIRouter, HTTPException, status
+from fastapi.security import OAuth2PasswordBearer
+from src.controller.controllerToken import  validate_token
+import jwt
 
 
-        return verify_token_middleware
+
+
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
+
+def validate_current_token(token: str = Depends(oauth2_scheme)):
+    
+    try: 
+         token = validate_token(token)
+         
+         print(token)
+         
+    except jwt.exceptions.DecodeError as e:
+        print("-------------------", e)
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail=f"Error: {e}",
+            headers={"WWW-Authenticate": "Bearer"},)
+    except jwt.exceptions.InvalidTokenError as e:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail=f"Error: {e}",
+            headers={"WWW-Authenticate": "Bearer"},)     
+    except jwt.exceptions.InvalidSignatureError as e:
+        print (e)
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail=f"Error: {e}",
+            headers={"WWW-Authenticate": "Bearer"},)     
+    except jwt.exceptions.ExpiredSignatureError as e:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail=f"Error: {e}",
+            headers={"WWW-Authenticate": "Bearer"},)
