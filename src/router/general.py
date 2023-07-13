@@ -1,34 +1,39 @@
-from fastapi import  Depends, APIRouter
+"""Imports."""
+from fastapi import Depends, APIRouter
 from src.model.search import Search
-from src.model.request import Insert
-from src.db.general import Database
- 
 
-import src.controller.controllerHttp as controllerHttp
 from src.middleware.token import validate_current_token
+from src.service.serviceHttp import http_response_code
+from src.controller.generalController import search_controller
+from src.tools.messageResponse import message_response, message_type_error, message_exception_error
 
- 
-demo = Database('demo')
 
 general = APIRouter(
-    prefix="/api/v1/general",    
-    responses={404: {"description": "Not found"}}
+    prefix="/api/v1/general",
+    responses={404: {"description": "Not found route"}}
 )
 
 # SEARCH GENERAL SQL
+
+
 @general.post("/search", dependencies=[Depends(validate_current_token)])
 async def search(data: Search):
-    demo.connectar();  
+    """Route to Logear user."""
+    try:
+        rs = search_controller(data)
 
-    if data.where is not None: 
-         info = demo.search(data.fields, data.table, data.where)
-    else: 
-        info = demo.search(data.fields, data.table)
-    return info
+        if type(rs) is dict:
+            if rs.get('success') is True:
+
+                return http_response_code(200, message_response(**rs))
+            else:
+                return http_response_code(400, message_response(**rs))
+        else:
+            return http_response_code(500, message_response(False, {}, {"message": "error no controlado"}))
+
+    except TypeError as e:
+        message_type_error(e)
+    except Exception as e:
+        message_exception_error(e, "/search")
 
 # INSERT GENERAL SQL
-@general.post("/insert")
-async def insert(data: Insert):
-    response, message = demo.insert(data.insert, data.values)
-    return controllerHttp.HttpResponse(response, message)
-    

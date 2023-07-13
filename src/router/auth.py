@@ -1,43 +1,30 @@
+"""Route Login."""
 from fastapi import APIRouter
-from src.controller.controllerToken import write_token
-from src.tools.toolsBcript import checkPasswd
-import src.controller.controllerHttp as controllerHttp
+from src.service.serviceHttp import http_response_code
 from src.model.auth import Login
-from src.db.general import Database
+from src.controller.authController import login_controller
+from src.tools.messageResponse import message_response, message_type_error, message_exception_error
 
-auth = APIRouter(
-    prefix="/api/v1",
-    responses={404: {"description": "Not found"}}
-)
-
-db = Database('auth')
+auth = APIRouter(prefix="/api/v1",
+                 responses={404: {"description": "Not found"}})
 
 
 @auth.post("/login")
-async def login(data: Login):
+def login(data: Login):
+    """Route to Logear user."""
+    try:
+        rs = login_controller(data)
 
-    username = data.username
-    password = data.password
+        if type(rs) is dict:
+            if rs.get('success') is True:
 
-    cursor = db.connectar()
+                return http_response_code(200, message_response(**rs))
+            else:
+                return http_response_code(401, message_response(**rs))
+        else:
+            return http_response_code(500, message_response(False, {}, {"message": "error no controlado"}))
 
-    cursor.execute('Select username, password From users Where username = ? or email = ?', [
-                   username, password])
-
-    count = cursor.rowcount
-
-    if count > 0:
-        for (user, has) in cursor.fetchall():
-            if checkPasswd(password, has):
-                token = write_token({"username": user,                                     
-                                     "permissions": [
-                                         "admin",
-                                         "user:read",
-                                         "user:write"
-                                     ],
-                                     })
-                return controllerHttp.HttpResponse(True, {"token": token})
-
-        return controllerHttp.HttpResponse(False, "Not Match Pass")
-    else:
-        return controllerHttp.HttpResponse(False, "Not Found Rows")
+    except TypeError as e:
+        message_type_error(e)
+    except Exception as e:
+        message_exception_error(e)

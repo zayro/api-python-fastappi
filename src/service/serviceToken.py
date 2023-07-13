@@ -1,10 +1,10 @@
+"""IMPORTS."""
 import os
-import dotenv
 import jwt
+from dotenv import load_dotenv
 from datetime import datetime, timedelta
-from fastapi.responses import JSONResponse
 
-dotenv.load_dotenv()
+load_dotenv()
 
 
 def expire_date(days: int):

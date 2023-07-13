@@ -1,6 +1,7 @@
 fastapi
 #typing 
 mariadb
+psycopg2
 datetime 
 uuid
 PyJWT
@@ -8,5 +9,10 @@ pydantic
 mypy
 uvicorn[standard]
 jinja2
-dotenv
+python-dotenv
 bcrypt
+pony
+medoo
+records
+tablib
+pandas
