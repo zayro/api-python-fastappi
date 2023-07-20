@@ -9,15 +9,20 @@ def HttpResponse(status: bool, message, **info):
     return {"success": status, "data": message, "info": info}
 
 
-def http_response_code(code: int, message):
+def http_response_code(**data):
     """Response Request."""
-    status_code = 500
+    code = data.get('code', 500)
+    header = data.get('header', {})
+    data.pop("header", {})
+    content_data = data.get('data', [])
     if code == 200:
         status_code = status.HTTP_200_OK
     elif code == 201:
         status_code = status.HTTP_201_CREATED
     elif code == 202:
         status_code = status.HTTP_202_ACCEPTED
+    elif code == 304:
+        status_code = status.HTTP_304_NOT_MODIFIED
     elif code == 400:
         status_code = status.HTTP_400_BAD_REQUEST
     elif code == 401:
@@ -36,4 +41,7 @@ def http_response_code(code: int, message):
         status_code = status.HTTP_503_SERVICE_UNAVAILABLE
     else:
         status_code = status.HTTP_500_INTERNAL_SERVER_ERROR
-    return JSONResponse(status_code=status_code, content=message)
+    
+    data.pop("code")
+
+    return JSONResponse(status_code=status_code, content=data, headers=header)

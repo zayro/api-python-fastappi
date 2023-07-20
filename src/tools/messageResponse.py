@@ -1,6 +1,12 @@
 
-def message_response(success: bool, data, info=None):
+def message_response(success: bool, data, info=None, code=None):
     """Return message formatter."""
+    print(code)
+    return {"success": success, "data": data, "info": info}
+
+def message_response_object(success: bool, data, info=None, code=None):
+    """Return message formatter."""
+    print(code)
     return {"success": success, "data": data, "info": info}
 
 

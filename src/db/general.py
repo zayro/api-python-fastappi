@@ -61,8 +61,8 @@ class Database:
 
     def query(self, stm):
         rs = self.conn.query(stm, commit=True)
-        print(rs.export("json"))
-        return rs.export("json")
+        #print(rs.export("json"))
+        return rs
 
     def log(self):
         rs = self.conn.log()

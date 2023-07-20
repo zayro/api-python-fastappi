@@ -12,6 +12,8 @@ from src.service.serviceToken import write_token
 def login_controller(data: Login):
     """Esta Fucion permite Acceder al login ."""
     try:
+        
+        print("---- redis ----", r.ping())
         db = Database()
         print("ingreso a loginController")
 
