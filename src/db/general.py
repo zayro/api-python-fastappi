@@ -36,7 +36,7 @@ class Database:
 
    # Calling destructor
     def __del__(self):
-        print("Destructor called")
+        print("Destructor Database.db called")
         self.conn.close()
 
     def select(self, table, field="*"):
@@ -61,7 +61,7 @@ class Database:
 
     def query(self, stm):
         rs = self.conn.query(stm, commit=True)
-        #print(rs.export("json"))
+        # print(rs.export("json"))
         return rs
 
     def log(self):

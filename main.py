@@ -1,13 +1,17 @@
 """RUN PROJECT."""
 import uvicorn
-from fastapi import FastAPI, Request, status, WebSocket, WebSocketDisconnect
+from fastapi import Body, FastAPI, HTTPException, Request, Response, Request, status, WebSocket, WebSocketDisconnect
 from fastapi.encoders import jsonable_encoder
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
 from starlette.exceptions import HTTPException as StarletteHTTPException
 from fastapi.staticfiles import StaticFiles
+from fastapi_etag import add_exception_handler
 
-from src.redis.connect import cache_redis
+
+import time
+from src.service.websocketService import ConnectionManager, ConnectionWebsocket
+import json
 
 # Routes
 
@@ -18,12 +22,25 @@ from src.router.view import view
 
 # INIT APP
 app = FastAPI()
+add_exception_handler(app)
+
+manager = ConnectionManager()
+connectionWebsocket = ConnectionWebsocket()
+
+
+@app.middleware("http")
+async def add_cache_headers(request: Request, call_next) -> Response:
+    print("validate middleware")
+    start_time = time.time()
+    response = await call_next(request)
+    process_time = time.time() - start_time
+    response.headers["X-Process-Time"] = str(process_time)
+    return response
 
 
 @app.on_event("startup")
-async def startup_event():
+def startup_event():
     print('start app')
-    cache_redis()
 
 
 @app.on_event("shutdown")
@@ -65,31 +82,14 @@ async def root():
     return {"Hello": "World"}
 
 
+@app.get("/api/v1")
+async def root():
+    return {"api": "v1"}
+
+
 @app.get("/items/{item_id}")
 async def read_item(item_id: int, q: str | None = None):
     return {"item_id": item_id, "q": q}
-
-
-class ConnectionManager:
-    def __init__(self):
-        self.active_connections: list[WebSocket] = []
-
-    async def connect(self, websocket: WebSocket):
-        await websocket.accept()
-        self.active_connections.append(websocket)
-
-    def disconnect(self, websocket: WebSocket):
-        self.active_connections.remove(websocket)
-
-    async def send_personal_message(self, message: str, websocket: WebSocket):
-        await websocket.send_text(message)
-
-    async def broadcast(self, message: str):
-        for connection in self.active_connections:
-            await connection.send_text(message)
-
-
-manager = ConnectionManager()
 
 
 @app.websocket("/ws/{client_id}")
@@ -104,6 +104,38 @@ async def websocket_endpoint(websocket: WebSocket, client_id: int):
     except WebSocketDisconnect:
         manager.disconnect(websocket)
         await manager.broadcast(f"Client #{client_id} Disconnect")
+        print(f"Disconnect Client #{client_id}")
+
+
+@app.websocket("/ws/json/{client_id}")
+async def websocket_endpoint(websocket: WebSocket, client_id: int):
+    await connectionWebsocket.connect(client_id, websocket)
+    try:
+        while True:
+            print(f"info user #{client_id}")
+
+            data = await websocket.receive_json()
+
+            user_broadcast = data.get('broadcast', None)
+            user_message = data.get('message', None)
+
+            if (user_broadcast is not None):
+
+                await connectionWebsocket.send_private(user_broadcast, user_message)
+                info = {"user": client_id, "message": user_message}
+                await connectionWebsocket.broadcast(info)
+                print(f"Connect Client #{client_id}")
+
+            if (data.get('listUser', None) is not None):
+                print("listUser", client_id)
+                await connectionWebsocket.send_list_users(client_id)
+
+            if (data.get('private', None) is not None and data.get('user_id', None) is not None):
+                await connectionWebsocket.send_private(data.get('user_id'), data.get('message'))
+
+    except WebSocketDisconnect:
+        connectionWebsocket.disconnect(client_id)
+        await connectionWebsocket.broadcast(f"Client #{client_id} Disconnect")
         print(f"Disconnect Client #{client_id}")
 
 

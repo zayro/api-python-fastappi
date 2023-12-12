@@ -25,4 +25,8 @@ websockets
 pika
 #Test
 rich
+pytest
 logging
+orjson
+#Middleware
+fastapi_etag 

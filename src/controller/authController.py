@@ -3,24 +3,21 @@
 sys.path.append('..')
  """
 import json
-from src.model.auth import Login
+from src.model.authModel import Login
 from src.db.general import Database
 from src.tools.toolsBcript import checkPasswd
-from src.service.serviceToken import write_token
+from src.service.tokenService import write_token
 
 
 def login_controller(data: Login):
     """Esta Fucion permite Acceder al login ."""
     try:
         
-        print("---- redis ----", r.ping())
         db = Database()
         print("ingreso a loginController")
 
         # Search User
-        rs = db.search("auth.users", "*", where={"username": data.username}).export(
-            "json"
-        )
+        rs = db.search("auth.users", "*", where={"username": data.username}).export( "json")
 
         info = json.loads(rs)
 
@@ -34,18 +31,21 @@ def login_controller(data: Login):
                         "permissions": ["admin", "user:read", "user:write"],
                     }
                 )
-                return {"success": True, "data": [{"token": token}], "info": {}}
+                return {"success": True, "data": {"token": token, "username": data.username, "email": info[0].get("email")}, "info": {}, "code": 200}
+       
             else:
                 return {
                     "success": False,
                     "data": [],
                     "info": {"message": "not match password"},
+                    "code": 401
                 }
         else:
             return {
                 "success": False,
                 "data": [],
                 "info": {"message": "not match username"},
+                "code": 401
             }
 
     except Exception as e:

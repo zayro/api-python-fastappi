@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Chat</title>
+</head>
+
+<body>
+    <h1>WebSocket Chat</h1>
+    <h2>Your ID: <span id="ws-id"></span></h2>
+    <form action="" onsubmit="sendMessage(event)">
+        <input type="text" id="user" placeholder="user" autocomplete="off" />
+        <input type="text" id="messageText" placeholder="message" autocomplete="off" />
+        <button>Send</button>
+        <button type="button" onclick="getListUser()">loadUser</button>
+        <button type="button" onclick="sendPrivate()">private</button>
+    </form>
+    <ul id='messages'>
+    </ul>
+    <script>
+        // Crea un # para el cliente
+        var client_id = Date.now()
+        document.querySelector("#ws-id").textContent = client_id;
+        
+        // Realiza la conexion
+        var ws = new WebSocket(`ws://localhost:4001/ws/json/${client_id}`);
+        
+        // Escuha los mensajes del Socket        
+        ws.onopen = function(e) {
+          console.log("[open] Conexión establecida");
+          console.log("Enviando al servidor")
+        };        
+        
+        ws.onmessage = function (event) {
+            console.log("ws.onmessage", event.data)
+            /*
+            var messages = document.getElementById('messages')
+            var message = document.createElement('li')
+            var content = document.createTextNode(event.data)
+            message.appendChild(content)
+            messages.appendChild(message)
+            */
+        };
+        
+        ws.onclose  = function(error) {
+          console.log(`[close socket]`);
+        };
+                
+        ws.onerror = function(error) {
+          console.log(`[error]`);
+        };
+
+        // Envia mensajes
+        function sendMessage(event) {
+            var input = document.getElementById("messageText")
+            const enviar = {"user_id": client_id, "message":  input.value } 
+            console.log("sendMessage", JSON.stringify(enviar))
+            ws.send(JSON.stringify(enviar))
+            input.value = ''
+            event.preventDefault()
+        }
+        
+        
+        function getListUser() {        
+            const enviar = {"listUser": true } 
+            console.log("sendMessage", JSON.stringify(enviar))
+            ws.send(JSON.stringify(enviar)) 
+        }
+        
+        function sendPrivate() {     
+            const input = document.getElementById("user")   
+            const message = document.getElementById("messageText")
+            const enviar = {"user_id": input.value , "message": message.value, "private": true } 
+            console.log("sendMessage", JSON.stringify(enviar))
+            ws.send(JSON.stringify(enviar)) 
+        }
+    </script>
+</body>
+
+</html>

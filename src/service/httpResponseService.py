@@ -13,8 +13,7 @@ def http_response_code(**data):
     """Response Request."""
     code = data.get('code', 500)
     header = data.get('header', {})
-    data.pop("header", {})
-    content_data = data.get('data', [])
+
     if code == 200:
         status_code = status.HTTP_200_OK
     elif code == 201:
@@ -41,7 +40,8 @@ def http_response_code(**data):
         status_code = status.HTTP_503_SERVICE_UNAVAILABLE
     else:
         status_code = status.HTTP_500_INTERNAL_SERVER_ERROR
-    
+
     data.pop("code")
+    data.pop("header", {})
 
     return JSONResponse(status_code=status_code, content=data, headers=header)

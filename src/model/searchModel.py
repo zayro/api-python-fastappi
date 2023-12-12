@@ -2,8 +2,8 @@ from pydantic import BaseModel, field_validator
 
 
 class Search(BaseModel):
-
-    table: str
+    query: str
+    table: str | None = {}
     fields: list | str
     where: dict | None = {}
 
