@@ -12,6 +12,9 @@ bcrypt
 records
 tablib
 pandas
+#file
+pathlib
+python-multipart
 #base de datos
 mariadb
 psycopg2

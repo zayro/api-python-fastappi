@@ -17,21 +17,25 @@ general = APIRouter(prefix="/api/v1/general")
 async def search(data: Search):
     """Route to Logear user."""
     try:
-        print("route search")
         rs = search_controller(data)
 
         if type(rs) is dict:
-            if rs.get('success') is True:
-
-                return http_response_code(**rs)
-            else:
-                return http_response_code(**rs)
-        else:
-            return http_response_code(500, message_response(False, {}, {"message": "error no controlado"}))
+            return http_response_code(**rs)
 
     except TypeError as e:
-        message_type_error(e)
+        print("----- TypeError Database ----- ")
+        print(str(e))
+        print("-------------------- ")
+        return http_response_code(**message_response(success=False, info={"message": str(e)}, code=500))
     except Exception as e:
-        message_exception_error(e, "/search")
-
-# INSERT GENERAL SQL
+        print("----- Exception Database... ----- ")
+        print(
+            type(e).__name__,          # TypeError
+            __file__,                  # /tmp/example.py
+            e.__traceback__.tb_lineno,  # 2
+            "error database"
+        )
+        print("--------- ERROR STR ----------- \n ")
+        print(str(e))
+        print("-------------------- \n")
+        return http_response_code(**message_response(success=False, info={"message": str(type(e).__name__)}, code=500))

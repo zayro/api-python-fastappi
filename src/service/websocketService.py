@@ -30,14 +30,14 @@ class ConnectionManager:
     async def send_personal_message(self, message: str, websocket: WebSocket):
         await websocket.send_text(message)
         print(self.active_connections[websocket])
-        
+
     async def send_personal_message_json(self, message: str, websocket: WebSocket):
         await websocket.send_json(message)
 
     async def broadcast(self, message: str):
         for connection in self.active_connections:
             await connection.send_text(message)
-            
+
     async def broadcast_json(self, message: str):
         for connection in self.active_connections:
             await connection.send_json(message)
@@ -55,8 +55,8 @@ class ConnectionWebsocket:
         Agrega a la lista los usuarios conectados 
         """
         await websocket.accept()
-        self.active_connections[f"{id_connect}"]                        = websocket
-        print(self.active_connections) 
+        self.active_connections[f"{id_connect}"] = websocket
+        print(self.active_connections)
 
     def disconnect(self, id_connect: str):
         """ 
@@ -66,16 +66,14 @@ class ConnectionWebsocket:
         print(self.active_connections)
 
     async def send_private(self, id_connect: str, message: str):
- 
+
         websocket = self.active_connections.get(f"{id_connect}", None)
         print(websocket)
         if websocket is not None:
             await websocket.send_json({"user_id": id_connect, "message": message})
         else:
             return False
-            
-        
-        
+
     async def send_list_users(self, id_connect: str):
         print("id_connect", id_connect)
         websocket = self.active_connections.get(f"{id_connect}")
@@ -86,4 +84,3 @@ class ConnectionWebsocket:
     async def broadcast(self, message: str):
         for connection in self.active_connections:
             await self.active_connections[connection].send_json(message)
-

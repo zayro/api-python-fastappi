@@ -19,11 +19,11 @@ class Database:
                 logging=True,
             )
         except TypeError as e:
-            print("----- TypeError Database ----- ")
+            print("----- TypeError General Database ----- ")
             print(str(e))
             print("---------- ")
         except Exception as e:
-            print("----- Exception Database ----- ")
+            print("----- Exception General Database ----- ")
             print(
                 type(e).__name__,          # TypeError
                 __file__,                  # /tmp/example.py

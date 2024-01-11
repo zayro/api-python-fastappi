@@ -5,7 +5,8 @@ from src.model.authModel import Login
 from src.controller.authController import login_controller
 from src.tools.messageResponse import message_response, message_type_error, message_exception_error
 
-auth = APIRouter(prefix="/api/v1", responses={404: {"description": "Not found"}})
+auth = APIRouter(prefix="/api/v1",
+                 responses={404: {"description": "Not found"}})
 
 
 @auth.post("/login")
@@ -21,7 +22,7 @@ def login(data: Login):
                 return http_response_code(**rs)
             else:
                 print("error info login")
-                return http_response_code( **rs)
+                return http_response_code(**rs)
         else:
             return http_response_code({"success": False, "code": 500, "info": "Erron no controlado"})
 

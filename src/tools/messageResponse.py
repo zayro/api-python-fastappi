@@ -1,13 +1,8 @@
 
-def message_response(success: bool, data, info=None, code=None):
+def message_response(success: bool, data=None, info=None, code=None):
     """Return message formatter."""
     print(code)
-    return {"success": success, "data": data, "info": info}
-
-def message_response_object(success: bool, data, info=None, code=None):
-    """Return message formatter."""
-    print(code)
-    return {"success": success, "data": data, "info": info}
+    return {"success": success, "data": data, "info": info, "code": code}
 
 
 def message_type_error(e):
