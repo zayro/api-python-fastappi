@@ -24,6 +24,7 @@
 - uvicorn main:app --reload
 - uvicorn main:app --reload --host 0.0.0.0 --port 4001
 - uvicorn main:app --host 0.0.0.0 --port 4001
+- uvicorn main:app --host 0.0.0.0 --port 4001 --workers 4
 
 ### Bibliografia
 

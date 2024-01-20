@@ -1,21 +1,18 @@
 """RUN PROJECT."""
 import uvicorn
-from fastapi import Body, FastAPI, HTTPException, Request, Response, Request, status, WebSocket, WebSocketDisconnect
-from fastapi.encoders import jsonable_encoder
+from fastapi import Body, FastAPI, HTTPException, Request, Response, Request, status
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
 from starlette.exceptions import HTTPException as StarletteHTTPException
 from fastapi.staticfiles import StaticFiles
+from fastapi.encoders import jsonable_encoder
 from fastapi_etag import add_exception_handler
 from fastapi.middleware.cors import CORSMiddleware
 
 import time
-import json
-from src.service.websocketService import ConnectionManager, ConnectionWebsocket
-
+from datetime import datetime
 
 # Routes
-
 from src.router.auth import auth
 from src.router.general import general
 from src.router.query import query
@@ -23,18 +20,15 @@ from src.router.view import view
 from src.router.pdf import pdf
 from src.router.upload import upload
 from src.router.files import files
+from src.router.webSocket import socket
 
 # INIT APP
 app = FastAPI()
 add_exception_handler(app)
 
-manager = ConnectionManager()
-connectionWebsocket = ConnectionWebsocket()
-
 
 @app.middleware("http")
 async def add_cache_headers(request: Request, call_next) -> Response:
-    print("validate middleware")
     start_time = time.time()
     response = await call_next(request)
     process_time = time.time() - start_time
@@ -60,15 +54,26 @@ app.add_middleware(
 @app.on_event("startup")
 def startup_event():
     print('start app')
+    start_time = datetime.now()
+    with open("src/log.txt", mode="a") as log:
+        log.write(f"--  \n")
+        log.write(f"Application Start: {start_time}\n")
+        log.close()
 
 
 @app.on_event("shutdown")
 def shutdown_event():
-    with open("log.txt", mode="a") as log:
-        log.write("Application shutdown")
+    start_time = datetime.now()
+    with open("src/log.txt", mode="a") as log:
+        log.write(f"Application shutdown: {start_time}\n")
+        log.close()
 
 
 app.mount("/public", StaticFiles(directory="public"), name="public")
+
+'''
+* Exception of project
+'''
 
 
 @app.exception_handler(RequestValidationError)
@@ -94,6 +99,9 @@ async def http_exception_handler(request, exc):
             "info": exc.detail}),
     )
 
+'''
+* Routes of project
+'''
 
 app.include_router(auth)
 app.include_router(general)
@@ -102,6 +110,7 @@ app.include_router(query)
 app.include_router(pdf)
 app.include_router(upload)
 app.include_router(files)
+app.include_router(socket)
 
 
 @app.get("/")
@@ -112,58 +121,6 @@ async def root():
 @app.get("/api/v1")
 async def root():
     return {"api": "v1"}
-
-
-@app.get("/items/{item_id}")
-async def read_item(item_id: int, q: str | None = None):
-    return {"item_id": item_id, "q": q}
-
-
-@app.websocket("/ws/{client_id}")
-async def websocket_endpoint(websocket: WebSocket, client_id: int):
-    await manager.connect(websocket)
-    try:
-        while True:
-            data = await websocket.receive_text()
-            await manager.send_personal_message(f"You wrote: {data}", websocket)
-            await manager.broadcast(f"Client #{client_id} says: {data}")
-            print(f"Connect Client #{client_id}")
-    except WebSocketDisconnect:
-        manager.disconnect(websocket)
-        await manager.broadcast(f"Client #{client_id} Disconnect")
-        print(f"Disconnect Client #{client_id}")
-
-
-@app.websocket("/ws/json/{client_id}")
-async def websocket_endpoint(websocket: WebSocket, client_id: int):
-    await connectionWebsocket.connect(client_id, websocket)
-    try:
-        while True:
-            print(f"info user #{client_id}")
-
-            data = await websocket.receive_json()
-
-            user_broadcast = data.get('broadcast', None)
-            user_message = data.get('message', None)
-
-            if (user_broadcast is not None):
-
-                await connectionWebsocket.send_private(user_broadcast, user_message)
-                info = {"user": client_id, "message": user_message}
-                await connectionWebsocket.broadcast(info)
-                print(f"Connect Client #{client_id}")
-
-            if (data.get('listUser', None) is not None):
-                print("listUser", client_id)
-                await connectionWebsocket.send_list_users(client_id)
-
-            if (data.get('private', None) is not None and data.get('user_id', None) is not None):
-                await connectionWebsocket.send_private(data.get('user_id'), data.get('message'))
-
-    except WebSocketDisconnect:
-        connectionWebsocket.disconnect(client_id)
-        await connectionWebsocket.broadcast(f"Client #{client_id} Disconnect")
-        print(f"Disconnect Client #{client_id}")
 
 
 if __name__ == "__main__":

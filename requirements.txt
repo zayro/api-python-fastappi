@@ -1,5 +1,7 @@
 fastapi
 uvicorn[standard]
+#Deploy
+gunicorn
 #typing 
 datetime 
 uuid
@@ -32,4 +34,4 @@ pytest
 logging
 orjson
 #Middleware
-fastapi_etag 
+fastapi_etag
