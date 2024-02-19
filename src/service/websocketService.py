@@ -1,4 +1,7 @@
-"""Class."""
+""" Service."""
+
+import traceback
+from datetime import datetime
 from fastapi import WebSocket
 
 
@@ -11,7 +14,7 @@ class ConnectionManager:
 
     async def connect(self, websocket: WebSocket):
         """
-        Agrega a la lista los usuarios conectados 
+        Agrega a la lista los usuarios conectados
         """
         await websocket.accept()
         self.active_connections.append(websocket)
@@ -21,7 +24,7 @@ class ConnectionManager:
 
     def disconnect(self, websocket: WebSocket):
         """
-        Elimina a la lista los usuarios conectados 
+        Elimina a la lista los usuarios conectados
         """
         self.active_connections.remove(websocket)
         print(self.active_connections)
@@ -43,7 +46,6 @@ class ConnectionManager:
 
 
 class ConnectionWebsocket:
-
     users: list = []
 
     def __init__(self):
@@ -52,21 +54,19 @@ class ConnectionWebsocket:
         """
         self.active_connections: dict = {}
 
-    async def connect(self, id_connect: str, time_start: str,  websocket: WebSocket):
+    async def connect(self, id_connect: str, time_start: str, websocket: WebSocket):
         """
-        Agrega a la lista los usuarios conectados 
+        Agrega a la lista los usuarios conectados
         """
         await websocket.accept()
         current_user = {
             "user": f"{id_connect}",
-            "time_start": f"{time_start}",
             "history": [
                 {
                     "module": "init session",
                     "time_start": f"{time_start}",
                 }
-
-            ]
+            ],
         }
         self.active_connections[f"{id_connect}"] = websocket
         self.users.append(current_user)
@@ -74,42 +74,43 @@ class ConnectionWebsocket:
         print("Current User", self.users, "\n")
 
     def disconnect(self, id_connect: str):
+        """Elimina a la lista los usuarios conectados"""
         try:
-
-            """ 
-            Elimina a la lista los usuarios conectados 
-            """
             print("disconnect", id_connect, "\n")
             self.active_connections.pop(f"{id_connect}")
 
             find_user_discard = self.find_user_discard(
-                find=id_connect, find_by="user", list_dict=self.users)
+                find=id_connect, find_by="user", list_dict=self.users
+            )
 
             # self.users.clear()
 
             self.users = find_user_discard
 
-            print("users", self.users,  "\n")
+            print("users", self.users, "\n")
 
         except ValueError:
             print("That item does not exist")
 
     def find_connect(self, find, find_by, list_dict):
         return_element = [
-            element for element in list_dict if element[f"{find_by}"] == find]
+            element for element in list_dict if element[f"{find_by}"] == find
+        ]
         return return_element
 
     def update_user_module(self, find, value):
-
-        self.update_user_connect(find_by='user',
-                                 find=find,
-                                 value_update=value,
-                                 list_dict=self.users,
-                                 attribute='module')
+        self.update_user_connect(
+            find_by="user",
+            find=find,
+            value_update=value,
+            list_dict=self.users,
+            attribute="module",
+        )
 
     def find_user_discard(self, find, find_by, list_dict):
         return_element = [
-            element for element in list_dict if element[f"{find_by}"] != find]
+            element for element in list_dict if element[f"{find_by}"] != find
+        ]
         return return_element
 
     def delete_user_connect(self, list_dict: list, find_by, find):
@@ -117,19 +118,25 @@ class ConnectionWebsocket:
             if item[find_by] == find:
                 list_dict.remove(item)
 
-    async def add_info_connect(self, find: str, value: str):
+    async def add_info_connect(self, find: str, value: dict):
         try:
             print("ingreso al metodo")
+            now = datetime.now()
             # Lista comprimida
             return_new_list = [
-                element for element in self.users if element.get('user') == find]
-
-            print('🚀 ~ return_new_list:', return_new_list)
+                element for element in self.users if element.get("user") == find
+            ]
 
             if len(return_new_list) != 0:
                 for element in return_new_list:
                     # Actualiza dinámicamente el atributo especificado
-                    element['history'].append(value)
+                    print(len(element["history"]), "cantidad elementos", "\n")
+                    print(element["history"][-1], "ultimo elemento")
+                    if len(element["history"]) > 0:
+                        element["history"][-1].update({"time_end": f"{now}"})
+
+                    value["time_start"] = f"{now}"
+                    element["history"].append(value)
 
             else:
                 print("lista vacia")
@@ -140,14 +147,17 @@ class ConnectionWebsocket:
             print("Variable it's not defined")
         except ValueError:
             print("That item does not exist")
-        except:
-            print(" error no controlado")
+        except Exception as e:
+            print("error no controlado", e)
+            traceback.print_exc()
 
-    def update_user_connect(self, find: str, find_by: str, list_dict: list, value_update, attribute: str):
-
+    def update_user_connect(
+        self, find: str, find_by: str, list_dict: list, value_update, attribute: str
+    ):
         # Lista comprimida
         return_new_list = [
-            element for element in list_dict if element.get(find_by) == find]
+            element for element in list_dict if element.get(find_by) == find
+        ]
 
         if return_new_list:
             for element in return_new_list:
@@ -158,7 +168,6 @@ class ConnectionWebsocket:
         return return_new_list or list_dict
 
     async def send_private(self, id_connect: str, message: str):
-
         websocket = self.active_connections.get(f"{id_connect}", None)
         print(websocket)
         if websocket is not None:

@@ -12,12 +12,13 @@ from src.service.tokenService import write_token
 def login_controller(data: Login):
     """Esta Fucion permite Acceder al login ."""
     try:
-        
         db = Database()
         print("ingreso a loginController")
 
         # Search User
-        rs = db.search("auth.users", "*", where={"username": data.username}).export( "json")
+        rs = db.search("auth.users", "*", where={"username": data.username}).export(
+            "json"
+        )
 
         info = json.loads(rs)
 
@@ -28,30 +29,43 @@ def login_controller(data: Login):
                 print("creando token")
                 token = write_token(
                     {
+                        "username": data.username,
+                        "email": info[0].get("email"),
                         "permissions": ["admin", "user:read", "user:write"],
                     }
                 )
-                return {"success": True, "data": {"token": token, "username": data.username, "email": info[0].get("email")}, "info": {}, "code": 200}
-       
+                return {
+                    "success": True,
+                    "data": {
+                        "token": token,
+                        "username": data.username,
+                        "email": info[0].get("email"),
+                    },
+                    "info": {},
+                    "code": 200,
+                }
+
             else:
                 return {
                     "success": False,
                     "data": [],
                     "info": {"message": "not match password"},
-                    "code": 401
+                    "code": 401,
                 }
         else:
             return {
                 "success": False,
                 "data": [],
                 "info": {"message": "not match username"},
-                "code": 401
+                "code": 401,
             }
 
     except Exception as e:
         print("----- Exception loginController ----- ")
         print(
-            type(e).__name__,  __file__, e,
+            type(e).__name__,
+            __file__,
+            e,
         )
         print(str(e))
         print("---------- ")

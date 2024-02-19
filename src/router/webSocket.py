@@ -1,21 +1,18 @@
 # main.py
-from fastapi import APIRouter,  WebSocket, WebSocketDisconnect
-
-from src.service.websocketService import ConnectionManager, ConnectionWebsocket
 from datetime import datetime
+from fastapi import APIRouter, WebSocket, WebSocketDisconnect
+from src.service.websocketService import ConnectionManager, ConnectionWebsocket
 
 manager = ConnectionManager()
 connectionWebsocket = ConnectionWebsocket()
 
 
-socket = APIRouter(
-    prefix="/ws/v1",
-    responses={404: {"description": "Not found"}}
-)
+socket = APIRouter(prefix="/ws/v1", responses={404: {"description": "Not found"}})
 
 
 @socket.websocket("/text/{client_id}")
 async def websocket_endpoint(websocket: WebSocket, client_id: int):
+    """WebSocket text."""
     await manager.connect(websocket)
     try:
         while True:
@@ -30,11 +27,10 @@ async def websocket_endpoint(websocket: WebSocket, client_id: int):
 
 
 @socket.websocket("/json/{client_id}")
-async def websocket_endpoint(websocket: WebSocket, client_id: str):
+async def websocket_endpoint_json(websocket: WebSocket, client_id: str):
+    """WebSocket Json."""
     try:
-
         while True:
-
             now = datetime.now()
             users = connectionWebsocket.get_list_users()
             print("connect ws", client_id, "\n")
@@ -48,29 +44,29 @@ async def websocket_endpoint(websocket: WebSocket, client_id: str):
 
             data = await websocket.receive_json()
 
-            user_broadcast = data.get('broadcast', None)
-            user_message = data.get('message', None)
-            message_private = data.get('private', None)
-            user_id = data.get('user_id', None)
-            list_user = data.get('listUser', None)
-            update_user = data.get('updateUser', None)
+            user_broadcast = data.get("broadcast", None)
+            user_message = data.get("message", None)
+            message_private = data.get("private", None)
+            user_id = data.get("user_id", None)
+            list_user = data.get("listUser", None)
+            update_user = data.get("updateUser", None)
 
-            if (user_broadcast is not None):
+            if user_broadcast is not None:
                 await connectionWebsocket.send_private(client_id, user_message)
                 info = {"user": client_id, "message": user_message}
                 await connectionWebsocket.broadcast(info)
                 print(f"Connect Client #{client_id}")
 
-            if (list_user is not None):
+            if list_user is not None:
                 await connectionWebsocket.send_list_users(client_id)
 
-            if (message_private is not None and user_id is not None):
+            if message_private is not None and user_id is not None:
                 await connectionWebsocket.send_private(user_id, user_message)
 
-            if (update_user is not None):
-                update_user['time_start'] = f"{now}"
-                await connectionWebsocket.add_info_connect(find=client_id,
-                                                           value=update_user)
+            if update_user is not None:
+                await connectionWebsocket.add_info_connect(
+                    find=client_id, value=update_user
+                )
 
     except WebSocketDisconnect:
         connectionWebsocket.disconnect(client_id)

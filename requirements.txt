@@ -21,6 +21,7 @@ python-multipart
 mariadb
 psycopg2
 redis
+aioredis
 #FrameWork
 pony
 medoo

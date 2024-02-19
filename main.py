@@ -1,4 +1,5 @@
 """RUN PROJECT."""
+
 import uvicorn
 from fastapi import Body, FastAPI, HTTPException, Request, Response, Request, status
 from fastapi.exceptions import RequestValidationError
@@ -17,6 +18,7 @@ from src.router.auth import auth
 from src.router.general import general
 from src.router.query import query
 from src.router.view import view
+from src.router.cache import cache
 from src.router.pdf import pdf
 from src.router.upload import upload
 from src.router.files import files
@@ -53,7 +55,7 @@ app.add_middleware(
 
 @app.on_event("startup")
 def startup_event():
-    print('start app')
+    print("start app")
     start_time = datetime.now()
     with open("src/log.txt", mode="a") as log:
         log.write(f"--  \n")
@@ -71,21 +73,20 @@ def shutdown_event():
 
 app.mount("/public", StaticFiles(directory="public"), name="public")
 
-'''
-* Exception of project
-'''
+# Exception of project
 
-
+"""
 @app.exception_handler(RequestValidationError)
 async def validation_exception_handler(request: Request, exc: RequestValidationError):
     print("----- Throw validation_exception_handler  ----")
     return JSONResponse(
         status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
-        content=jsonable_encoder({
-            "success": False,
-            "info": exc.errors(),
-            "Body": exc.body}),
+        content=jsonable_encoder(
+            {"success": False, "info": exc.errors(), "Body": exc.body}
+        ),
     )
+    
+"""
 
 
 @app.exception_handler(StarletteHTTPException)
@@ -94,19 +95,19 @@ async def http_exception_handler(request, exc):
     print("----- Throw http_exception_handler  ----")
     return JSONResponse(
         status_code=exc.status_code,
-        content=jsonable_encoder({
-            "success": False,
-            "info": exc.detail}),
+        content=jsonable_encoder({"success": False, "info": exc.detail}),
     )
 
-'''
+
+"""
 * Routes of project
-'''
+"""
 
 app.include_router(auth)
 app.include_router(general)
 app.include_router(view)
 app.include_router(query)
+app.include_router(cache)
 app.include_router(pdf)
 app.include_router(upload)
 app.include_router(files)
@@ -114,11 +115,6 @@ app.include_router(socket)
 
 
 @app.get("/")
-async def root():
-    return {"Hello": "World"}
-
-
-@app.get("/api/v1")
 async def root():
     return {"api": "v1"}
 

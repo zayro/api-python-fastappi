@@ -1,3 +1,5 @@
+from fastapi import HTTPException, status
+
 
 def message_response(success: bool, data=None, info=None, code=None):
     """Return message formatter."""
@@ -19,4 +21,8 @@ def message_exception_error(e, name: str | None):
     print("---------- ")
     print("\n")
     print(str(e))
-    print("---------- ")
+    print("----- END ----- ")
+    raise HTTPException(
+        status_code=status.HTTP_429_TOO_MANY_REQUESTS,
+        detail=f"Too many requests: {str(e)}",
+    )

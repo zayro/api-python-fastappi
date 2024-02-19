@@ -9,7 +9,7 @@
         "**/__pycache__": true
     },
     "[python]": {
-        "editor.defaultFormatter": "ms-python.autopep8"
+        "editor.defaultFormatter": "ms-python.black-formatter"
     },
 
     "python.linting.pycodestyleEnabled": true,
@@ -20,5 +20,11 @@
 
     "python.formatting.autopep8Args": ["--aggressive", "--aggressive"],
 
-    "python.linting.pycodestyleArgs": ["--max-line-length=160"]
+    "python.linting.pycodestyleArgs": ["--max-line-length=160"],
+    "python.formatting.blackArgs": ["--line-length=140"],
+    "python.analysis.autoFormatStrings": true,
+    "python.analysis.autoImportCompletions": true,
+    "python.analysis.completeFunctionParens": true,
+    "notebook.experimental.variablesView": true,
+    "terminal.integrated.mouseWheelZoom": true
 }

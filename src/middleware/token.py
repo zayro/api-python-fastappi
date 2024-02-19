@@ -15,25 +15,25 @@ def validate_current_token(token: str = Depends(oauth2_scheme)):
 
         print(token)
 
-    except jwt.exceptions.DecodeError as e:
-        print("-------------------", e)
+    except jwt.exceptions.ExpiredSignatureError as e:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
-            detail=f"Error DecodeError: {e}",
-            headers={"WWW-Authenticate": "Bearer"},)
-    except jwt.exceptions.InvalidTokenError as e:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail=f"Error InvalidTokenError: {e}",
-            headers={"WWW-Authenticate": "Bearer"},)
+            detail=f"Error ExpiredSignatureError: {e}",
+            headers={"WWW-Authenticate": "Bearer"},) from e
     except jwt.exceptions.InvalidSignatureError as e:
         print(e)
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail=f"Error InvalidSignatureError: {e}",
-            headers={"WWW-Authenticate": "Bearer"},)
-    except jwt.exceptions.ExpiredSignatureError as e:
+            headers={"WWW-Authenticate": "Bearer"},) from e
+    except jwt.exceptions.DecodeError as e:
+        print("-------------------", e)
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
-            detail=f"Error ExpiredSignatureError: {e}",
-            headers={"WWW-Authenticate": "Bearer"},)
+            detail=f"Error DecodeError: {e}",
+            headers={"WWW-Authenticate": "Bearer"},) from e
+    except jwt.exceptions.InvalidTokenError as e:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail=f"Error InvalidTokenError: {e}",
+            headers={"WWW-Authenticate": "Bearer"},) from e
