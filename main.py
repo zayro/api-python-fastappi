@@ -26,6 +26,23 @@ from src.router.webSocket import socket
 
 # INIT APP
 app = FastAPI()
+
+tags_metadata = [
+    {"name": "Consulta", "description": "Metodos que permiten consultar"},
+    {"name": "Get Methods", "description": "Permite Consultar"},
+    {"name": "Post Methods", "description": "Ingresar Nueva Informacion"},
+    {"name": "Delete Methods", "description": "Eliminar Registros"},
+    {"name": "Put Methods", "description": "Actualizar Informacion"},
+]
+
+app = FastAPI(
+    title="ApiBackendApp",
+    description="Api que permite manejo informacion de la base de datos",
+    version="0.0.1",
+    openapi_tags=tags_metadata,
+)
+
+
 add_exception_handler(app)
 
 

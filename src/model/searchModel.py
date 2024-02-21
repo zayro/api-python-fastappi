@@ -1,11 +1,22 @@
-from pydantic import BaseModel, field_validator
+from pydantic import BaseModel
 
 
 class Search(BaseModel):
     query: str
-    table: str | None = {}
     fields: list | str
     where: dict | None = {}
+    model_config = {
+        "json_schema_extra": {
+            "examples": [
+                {"query": "demo.prueba", "fields": "*"},
+                {
+                    "from": "prueba",
+                    "fields": ["id", "nombre"],
+                    "order": [{"column": "id", "order": "desc"}],
+                },
+            ]
+        }
+    }
 
 
 """     @field_validator('where')

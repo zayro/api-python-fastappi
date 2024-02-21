@@ -30,6 +30,10 @@
 - uvicorn main:app --host 0.0.0.0 --port 4001
 - uvicorn main:app --host 0.0.0.0 --port 4001 --workers 4
 
+## Show Version
+
+- pip show fastapi
+
 ### Bibliografia
 
 - <https://www.slingacademy.com/article/fastapi-allowing-requests-from-other-origins-cors/>

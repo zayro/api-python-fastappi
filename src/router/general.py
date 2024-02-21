@@ -1,4 +1,5 @@
 """Imports."""
+
 from fastapi import Depends, APIRouter
 from src.model.searchModel import Search
 
@@ -14,12 +15,13 @@ from src.tools.messageResponse import (
 
 general = APIRouter(prefix="/api/v1/general")
 
+
 # SEARCH GENERAL SQL
-
-
-@general.post("/search", dependencies=[Depends(validate_current_token)])
+@general.post(
+    "/search", tags=["Consulta"], dependencies=[Depends(validate_current_token)]
+)
 async def search(data: Search):
-    """Route to Logear user."""
+    """Ruta que permite consultar directamente a las tablas o Vistas en la base de datos"""
     try:
         rs = search_controller(data)
 
