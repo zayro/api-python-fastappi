@@ -26,5 +26,23 @@
     "python.analysis.autoImportCompletions": true,
     "python.analysis.completeFunctionParens": true,
     "notebook.experimental.variablesView": true,
-    "terminal.integrated.mouseWheelZoom": true
+    "terminal.integrated.mouseWheelZoom": true,
+    "vsicons.associations.folders": [
+        {
+            "icon": "gradle",
+            "extensions": [
+                "postgresql",
+                "postgreSql",
+                "postgre",
+                "postgredb",
+                "pgdb"
+            ]
+        }
+    ],
+    "vsicons.associations.files": [
+        {
+            "icon": "ceylon",
+            "extensions": ["pg", "pgdb"]
+        }
+    ]
 }

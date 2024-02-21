@@ -1,6 +1,6 @@
 import json
 from pydantic import ValidationError
-from src.db.general import Database
+from src.database.postgredb.db import Database
 from src.service.redisService import RedisApi
 from src.service.datetimeService import time_to_miliseconds
 from src.service.cacheService import cache
@@ -23,13 +23,11 @@ def query_prueba():
     except Exception as e:
         print(e)
         message_exception_error(e, "query_prueba_controller Exception")
-        return {"success": False,
-                "data": [],
-                "info": {
-                    "error": "Error al formar Sql",
-                    "message": type(e).__name__
-                }
-                }
+        return {
+            "success": False,
+            "data": [],
+            "info": {"error": "Error al formar Sql", "message": type(e).__name__},
+        }
     except ValidationError as e:
         message_exception_error(e, "query_prueba_controller ValidationError")
         print(e.errors())
@@ -49,7 +47,7 @@ def query_prueba_redis():
             print("save cache")
             db = Database()
             info = db.query("select  * from demo.prueba").export("json")
-            
+
             print("type", type(info))
             rd.set_data("query_prueba", info, time_to_miliseconds(minutes=10))
             db.close()
@@ -57,7 +55,12 @@ def query_prueba_redis():
         else:
             print("load cache")
             cache_data = rd.get_data("query_prueba")
-            return {"success": True, "data": json.loads(cache_data), "info": {}, "code": 200}
+            return {
+                "success": True,
+                "data": json.loads(cache_data),
+                "info": {},
+                "code": 200,
+            }
 
     except TypeError as e:
         message_type_error(e)
@@ -65,16 +68,14 @@ def query_prueba_redis():
     except Exception as e:
         print(e)
         message_exception_error(e, "query_prueba_controller Exception")
-        return {"success": False,
-                "data": [],
-                "info": {
-                    "error": "Error al formar Sql",
-                    "message": type(e).__name__
-                }
-                }
+        return {
+            "success": False,
+            "data": [],
+            "info": {"error": "Error al formar Sql", "message": type(e).__name__},
+        }
     except ValidationError as e:
         message_exception_error(e, "query_prueba_controller ValidationError")
-        print(e.errors())        
+        print(e.errors())
 
 
 @cache(days=1)
@@ -93,13 +94,11 @@ def query_prueba_cache():
     except Exception as e:
         print(e)
         message_exception_error(e, "query_prueba_controller Exception")
-        return {"success": False,
-                "data": [],
-                "info": {
-                    "error": "Error al formar Sql",
-                    "message": type(e).__name__
-                }
-                }
+        return {
+            "success": False,
+            "data": [],
+            "info": {"error": "Error al formar Sql", "message": type(e).__name__},
+        }
     except ValidationError as e:
         message_exception_error(e, "query_prueba_controller ValidationError")
         print(e.errors())

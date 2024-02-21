@@ -1,8 +1,9 @@
 """Imports."""
+
 import json
 from pydantic import ValidationError
 from src.model.searchModel import Search
-from src.db.general import Database
+from src.database.postgredb.db import Database
 
 """ import sys
 sys.path.append('..')
@@ -17,8 +18,7 @@ def search_controller(data: Search):
 
         # Search User
         if data.where is not None:
-            info = db.search(data.query, data.fields,
-                             data.where).export("json")
+            info = db.search(data.query, data.fields, data.where).export("json")
         else:
             info = db.search(data.query, data.fields).export("json")
 

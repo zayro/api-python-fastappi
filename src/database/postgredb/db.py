@@ -1,11 +1,12 @@
-
 """Imports."""
+
 import sys
 from medoo import Medoo
 
 
 class Database:
-    # For other arguments, please refer to the original connect function of each client.
+    """Class representing a Database with Framework"""
+
     def __init__(self):
         print("Init DB")
         try:
@@ -25,16 +26,15 @@ class Database:
         except Exception as e:
             print("----- Exception General Database ----- ")
             print(
-                type(e).__name__,          # TypeError
-                __file__,                  # /tmp/example.py
-                e.__traceback__.tb_lineno  # 2
+                type(e).__name__,  # TypeError
+                __file__,  # /tmp/example.py
+                e.__traceback__.tb_lineno,  # 2
             )
             print(str(e))
             print("---------- ")
             sys.exit()
-            return "error"
 
-   # Calling destructor
+    # Calling destructor
     def __del__(self):
         print("Destructor Database.db called")
         self.conn.close()
