@@ -5,7 +5,7 @@ sys.path.append('..')
 
 import json
 from src.model.authModel import Login
-from src.database.postgredb.db import Database
+from database.postgredb.db_pg_medoo import Database
 from src.tools.toolsBcript import checkPasswd
 from src.service.tokenService import write_token
 

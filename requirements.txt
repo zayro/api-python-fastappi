@@ -22,8 +22,8 @@ mariadb
 psycopg2
 redis
 aioredis
-#FrameWork
-pony
+#ORM
+sqlalchemy
 medoo
 #webSocket
 websockets

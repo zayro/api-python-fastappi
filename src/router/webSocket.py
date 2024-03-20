@@ -38,6 +38,9 @@ async def websocket_endpoint_json(websocket: WebSocket, client_id: str):
             if len([item for item in users if item["user"] == client_id]) == 0:
                 print("user:", client_id, "list users:", users, "\n")
                 await connectionWebsocket.connect(client_id, now, websocket)
+                info_connect_user = {"user": client_id, "message": "User Connected"}
+                await connectionWebsocket.broadcast(info_connect_user)
+                print(f"Connect User:  {client_id}")
             else:
                 print("user exist:", client_id, "list users:", users, "\n")
                 # await websocket.close(reason="user connect yet")
@@ -70,5 +73,6 @@ async def websocket_endpoint_json(websocket: WebSocket, client_id: str):
 
     except WebSocketDisconnect:
         connectionWebsocket.disconnect(client_id)
-        await connectionWebsocket.broadcast(f"Client #{client_id} Disconnect")
-        print(f"Disconnect Client #{client_id}")
+        info_connect_user = {"user": client_id, "message": "User Disconnected"}
+        await connectionWebsocket.broadcast(info_connect_user)
+        print(f"Disconnect Client: {client_id}")

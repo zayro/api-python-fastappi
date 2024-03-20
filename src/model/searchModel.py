@@ -1,7 +1,11 @@
+"""Model Search"""
+
 from pydantic import BaseModel
 
 
-class Search(BaseModel):
+class Search(BaseModel): 
+    """Clase Busqueda"""
+
     query: str
     fields: list | str
     where: dict | None = {}
