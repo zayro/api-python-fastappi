@@ -3,7 +3,7 @@
 import json
 from pydantic import ValidationError
 from src.model.searchModel import Search
-from database.postgredb.db_pg_medoo import Database
+from src.database.postgredb.db_pg_medoo import Database
 
 from src.database.postgredb.connect import search_query
 
@@ -51,7 +51,7 @@ def search_controllers(data: Search):
         return {"success": False, "info": e.errors(), "code": 422}
 
 
-try:
+""" try:
     info = Search(query="demo.prueba", fields=["*"])
     # query="demo.prueba", fields=["*"]
     # info = {"query": "demo.prueba", "fields": ["*"]}
@@ -60,3 +60,4 @@ try:
 except ValidationError as exc:
     print(repr(exc.errors()[0]["type"]))
     print(exc.errors())
+ """

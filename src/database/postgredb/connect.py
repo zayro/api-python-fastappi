@@ -2,6 +2,8 @@
 
 import sys
 import json
+from icecream import ic
+import datetime
 from typing import Optional
 import psycopg2.extras
 
@@ -54,6 +56,43 @@ def connect():
             print("Error al cerrar la conexion")
 
 
+def execute_sql(sql: str):
+    """Retrieve data from the  table"""
+
+    ic(sql)
+
+    try:
+        with connect() as conn:
+            with conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor) as cur:
+                cur.execute(sql)
+                result = cur.fetchone()
+                return result
+
+    except psycopg2.DatabaseError as error:
+        print(error)
+
+
+def max_seq_table(
+    table: str,
+    field: str,
+):
+    """Retrieve data from the  table"""
+
+    sql = f"select max({field}) + 1 as {field} from {table}; "
+
+    ic(sql)
+
+    try:
+        with connect() as conn:
+            with conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor) as cur:
+                cur.execute(sql)
+                result = cur.fetchone()
+                return result
+
+    except psycopg2.DatabaseError as error:
+        print(error)
+
+
 def search_query(
     table: str,
     fields: list,
@@ -68,33 +107,77 @@ def search_query(
     sql = sql_tools.select(
         table=table, fields=fields, where=where, order=order, limit=limit
     )
-    print(sql)
+
+    ic(sql)
 
     try:
         with connect() as conn:
-            with conn.cursor(cursor_factory=psycopg2.extras.DictCursor) as cur:
+            with conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor) as cur:
                 cur.execute(sql)
                 print("The number of result: ", cur.rowcount)
-                result = cur.fetchall()
-                # Convertir las filas a JSON
-                result_to_json = json.dumps([dict(row) for row in result])
+                result = []
+                for row in cur.fetchall():
+                    result.append(
+                        {key: convertir_a_json(value) for key, value in row.items()}
+                    )
+
+                json_data = json.dumps(result, sort_keys=True)
+                ic(json_data)
                 cur.close()
 
-                return result_to_json
+                return json_data
 
     except psycopg2.DatabaseError as error:
         print(error)
+
+
+def insert_query(table: str, data_insert: dict):
+    """Retrieve data from the  table"""
+
+    sql_tools = SqlTools("pg")
+
+    sql = sql_tools.insert(table=table, data=data_insert)
+
+    ic(sql)
+
+    try:
+        with connect() as conn:
+            with conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor) as cur:
+                cur.execute(sql)
+                print("The number of result: ", cur.rowcount)
+
+                cur.close()
+
+                return {"message": "se ejecuto Exitosamente"}
+
+    except psycopg2.DatabaseError as error:
+        print(error)
+
+
+def convertir_a_json(valor):
+    ic(valor)
+    if isinstance(valor, datetime.datetime):
+        return valor.isoformat()
+    elif isinstance(valor, bytes):
+        return valor.decode("utf-8")
+    elif isinstance(valor, dict):
+        return {key: convertir_a_json(v) for key, v in valor.items()}
+    elif isinstance(valor, list):
+        return [convertir_a_json(v) for v in valor]
+    else:
+        return valor
 
 
 def prueba_query():
 
     query_table = "demo.prueba"
     query_fields = ["id", "name"]
-    limit_fields = 10
+    limit_fields = 1
 
     rows = search_query(table=query_table, fields=query_fields, limit=limit_fields)
 
     print(rows)
 
 
-prueba_query()
+res = max_seq_table("auth.users", "id_users")
+print(res)

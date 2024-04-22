@@ -36,3 +36,5 @@ logging
 orjson
 #Middleware
 fastapi_etag
+#logs
+icecream

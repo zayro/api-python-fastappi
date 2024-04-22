@@ -1,6 +1,6 @@
 import json
 from pydantic import ValidationError
-from database.postgredb.db_pg_medoo import Database
+from src.database.postgredb.db_pg_medoo import Database
 from src.service.redisService import RedisApi
 from src.service.datetimeService import time_to_miliseconds
 from src.service.cacheService import cache

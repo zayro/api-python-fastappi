@@ -1,11 +1,13 @@
-""" import sys
-
+""" 
+import sys
 sys.path.append('..')
  """
 
 import json
+from icecream import ic
 from src.model.authModel import Login
-from database.postgredb.db_pg_medoo import Database
+from src.database.postgredb.db_pg_medoo import Database
+from src.database.postgredb.connect import search_query
 from src.tools.toolsBcript import checkPasswd
 from src.service.tokenService import write_token
 
@@ -13,13 +15,17 @@ from src.service.tokenService import write_token
 def login_controller(data: Login):
     """Esta Fucion permite Acceder al login ."""
     try:
-        db = Database()
-        print("ingreso a loginController")
+
+        ic()
 
         # Search User
-        rs = db.search("auth.users", "*", where={"username": data.username}).export(
-            "json"
+        rs = search_query(
+            table="auth.users",
+            fields=["password", "email", "created_at"],
+            where={"username": data.username},
         )
+
+        ic(rs)
 
         info = json.loads(rs)
 
@@ -71,8 +77,6 @@ def login_controller(data: Login):
         print(str(e))
         print("---------- ")
         return "error"
-    finally:
-        db.close()
 
 
 def login_doc_controller(username, password):

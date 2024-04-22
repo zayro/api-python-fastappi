@@ -19,6 +19,8 @@ class SqlTools:
         if isinstance(fields, list):
             # list_field = ", ".join([str(elem) for elem in fields])
             list_field = ", ".join(fields)
+        else:
+            list_field = "*"
 
         query = f"SELECT {list_field} FROM {table}"
 
@@ -46,19 +48,31 @@ class SqlTools:
         query += ";"
         return query
 
-    def insert(self, table: str, data: list):
+    def insert(self, table: str, data: dict):
         query = f"INSERT INTO {table} "
-        keys = []
-        values = []
-        for dic in data:
-            for i, (key, value) in enumerate(dic.items()):
-                if i == 0:
-                    keys.append(key)
-                    values.append(value)
-                else:
-                    values.append(value)
+        query += ' ("{}") values  '.format('", "'.join(data.keys()))
+        query += " ('{}') ".format("', '".join(data.values()))
+        query += ";"
+        return query
 
-        query += "({}) values ('{}')".format(", ".join(keys), "', '".join(values))
+    def insert_multiples_stament(self, table: str, data: list) -> str:
+        query = f"INSERT INTO {table} "
+        common_keys = set(data[0].keys())
+        query += "({}) values ".format(", ".join(common_keys))
+        for dic in data:
+            placeholders = ", ".join(["%s"] * len(dic))
+            query += f"({placeholders}), "
+        query = query.rstrip(", ")
+        return query + ";"
+
+    def insert_multiples(self, table: str, data: list):
+        query = f"INSERT INTO {table} "
+        common_keys = set(data[0].keys())
+        query += "({}) values ".format(", ".join(common_keys))
+        for dic in data:
+            query += " ('{}'), ".format("', '".join(dic.values()))
+
+        query = query.rstrip(", ")
         query += ";"
         return query
 
@@ -90,14 +104,30 @@ info_filter = filter(table="clientes", fields=["nombre", "apellido"], ciudad="Ma
 def pruebas_insert():
     table = "demo"
 
+    data = {"nombre": "pepe", "apellido": "grillo"}
+
+    db = SqlTools("pg")
+    info_insert_v1 = db.insert(table=table, data=data)
+    print(info_insert_v1)
+
+
+pruebas_insert()
+
+
+def pruebas_insert_multiple():
+    table = "demo"
+
     data = [
         {"nombre": "pepe", "apellido": "grillo"},
         {"nombre": "marlon", "apellido": "arias"},
     ]
 
     db = SqlTools("pg")
-    info_insert_v1 = db.insert(table=table, data=data)
+    info_insert_v1 = db.insert_multiples(table=table, data=data)
     print(info_insert_v1)
+
+
+pruebas_insert_multiple()
 
 
 def pruebas_select():
@@ -119,7 +149,3 @@ def pruebas_select():
     print(info_filter_v2)
     print(info_filter_v3)
     print(info_filter_v4)
-
-
-pruebas_select()
-pruebas_insert()

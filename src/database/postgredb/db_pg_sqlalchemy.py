@@ -1,4 +1,5 @@
 from json import dumps
+from icecream import ic
 from sqlalchemy import MetaData, Table, create_engine, select, text
 
 
@@ -20,7 +21,10 @@ with engine.connect() as connection:
 
 
 with engine.connect() as conn:
-    execute = conn.execute(text("SELECT id::text, name, phone FROM demo.prueba limit 10"))
+    execute = conn.execute(
+        text("SELECT id::text, name, phone FROM demo.prueba limit 10")
+    )
+    ic()
     # Obtener todos los resultados como una lista de diccionarios
     result = execute.fetchall()
 
@@ -28,7 +32,7 @@ with engine.connect() as conn:
     if result:
         for row in result:
             print(row)
-            #print(dict([row]))
+            # print(dict([row]))
     else:
         row_dict = {}
 

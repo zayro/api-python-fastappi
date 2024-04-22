@@ -15,6 +15,7 @@ from datetime import datetime
 
 # Routes
 from src.router.auth import auth
+from src.router.user import user
 from src.router.general import general
 from src.router.query import query
 from src.router.view import view
@@ -121,6 +122,7 @@ async def http_exception_handler(request, exc):
 """
 
 app.include_router(auth)
+app.include_router(user)
 app.include_router(general)
 app.include_router(view)
 app.include_router(query)
