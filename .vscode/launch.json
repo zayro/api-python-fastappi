@@ -17,10 +17,9 @@
             "type": "python",
             "request": "launch",
             "module": "uvicorn",
-            "args": ["main:app", "--reload"],
+            "args": ["main:app", "--reload", "--port", "4000"],
             "env": {
-                "PYTHONPATH":"${workspaceFolder}"
-
+                "PYTHONPATH": "${workspaceFolder}"
             },
             "jinja": true,
             "justMyCode": true
@@ -30,9 +29,9 @@
             "type": "python",
             "request": "attach",
             "connect": {
-              "host": "localhost",
-              "port": 5678
+                "host": "localhost",
+                "port": 5678
             }
-          }
+        }
     ]
 }

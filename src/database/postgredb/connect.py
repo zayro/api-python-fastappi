@@ -1,15 +1,19 @@
-"""connect database """
+"""
+The code defines functions to connect to a PostgreSQL database, execute SQL queries, retrieve data,
+and insert data, with error handling and JSON conversion capabilities.
+:return: The `max_seq_table` function is returning the result of a SQL query that finds the maximum
+value of the field "id_users" in the "auth.users" table and increments it by 1. The result is
+returned as a dictionary containing the incremented value under the key "id_users".
+"""
 
 import sys
 import json
-from icecream import ic
 import datetime
 from typing import Optional
 import psycopg2.extras
-
-
-from config.settings import Enviroment
+from src.service.logService import ic
 from src.tools.sql import SqlTools
+from config.settings import Enviroment
 
 
 def connect():
@@ -57,10 +61,8 @@ def connect():
 
 
 def execute_sql(sql: str):
-    """Retrieve data from the  table"""
-
+    """Retrieve data from the table"""
     ic(sql)
-
     try:
         with connect() as conn:
             with conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor) as cur:
@@ -77,11 +79,8 @@ def max_seq_table(
     field: str,
 ):
     """Retrieve data from the  table"""
-
     sql = f"select max({field}) + 1 as {field} from {table}; "
-
     ic(sql)
-
     try:
         with connect() as conn:
             with conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor) as cur:
@@ -94,7 +93,7 @@ def max_seq_table(
 
 
 def search_query(
-    table: str,
+    query: str,
     fields: list,
     where: Optional[dict] = None,
     order: Optional[dict] = None,
@@ -105,7 +104,7 @@ def search_query(
     sql_tools = SqlTools("pg")
 
     sql = sql_tools.select(
-        table=table, fields=fields, where=where, order=order, limit=limit
+        table=query, fields=fields, where=where, order=order, limit=limit
     )
 
     ic(sql)
@@ -132,11 +131,11 @@ def search_query(
 
 
 def insert_query(table: str, data_insert: dict):
-    """Retrieve data from the  table"""
+    """Insert data from the  table"""
 
     sql_tools = SqlTools("pg")
 
-    sql = sql_tools.insert(table=table, data=data_insert)
+    sql = sql_tools.generate_insert_query(table_name=table, data=data_insert)
 
     ic(sql)
 
@@ -148,14 +147,18 @@ def insert_query(table: str, data_insert: dict):
 
                 cur.close()
 
-                return {"message": "se ejecuto Exitosamente"}
+                return {"success": True, "message": "se ejecuto Exitosamente"}
 
     except psycopg2.DatabaseError as error:
-        print(error)
+        ic(error)
+        return {
+            "success": False,
+            "message": "Error al ejecutar la consulta",
+            "error": str(error),
+        }
 
 
 def convertir_a_json(valor):
-    ic(valor)
     if isinstance(valor, datetime.datetime):
         return valor.isoformat()
     elif isinstance(valor, bytes):
@@ -166,18 +169,3 @@ def convertir_a_json(valor):
         return [convertir_a_json(v) for v in valor]
     else:
         return valor
-
-
-def prueba_query():
-
-    query_table = "demo.prueba"
-    query_fields = ["id", "name"]
-    limit_fields = 1
-
-    rows = search_query(table=query_table, fields=query_fields, limit=limit_fields)
-
-    print(rows)
-
-
-res = max_seq_table("auth.users", "id_users")
-print(res)

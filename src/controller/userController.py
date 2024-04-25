@@ -1,23 +1,23 @@
 import json
-from icecream import ic
+from src.service.logService import ic
 from src.model.userModel import User
-from src.database.postgredb.connect import insert_query, max_seq_table
+from src.model.requestModel import RequestResponse
+from src.model.authModel import Login
+from src.database.postgredb.connect import search_query, insert_query, max_seq_table
+from src.tools.toolsBcript import checkPasswd, createPasswd
+from src.service.tokenService import write_token
 
 
-def new_user_controller(data: User):
+def login_controller(data: Login):
     """Esta Fucion permite Acceder al login ."""
     try:
 
         # Search User
-        result_body_json = dict((x, y) for x, y in data)
-
-        max = max_seq_table(table="auth.users", field="id_users")
-
-        result_body_json.update(max)
-
-        ic(result_body_json)
-
-        rs = insert_query(table="auth.users", data_insert=result_body_json)
+        rs = search_query(
+            query="auth.users",
+            fields=["password", "email", "created_at"],
+            where={"username": data.username},
+        )
 
         ic(rs)
 
@@ -25,14 +25,34 @@ def new_user_controller(data: User):
 
         # Valid if exist user
         if len(info) > 0:
+            # Valid if password it's match
+            if checkPasswd(data.password, info[0].get("password")):
+                print("creando token")
+                token = write_token(
+                    {
+                        "username": data.username,
+                        "email": info[0].get("email"),
+                        "permissions": ["admin", "user:read", "user:write"],
+                    }
+                )
+                return {
+                    "success": True,
+                    "data": {
+                        "token": token,
+                        "username": data.username,
+                        "email": info[0].get("email"),
+                    },
+                    "info": {},
+                    "code": 200,
+                }
 
-            return {
-                "success": True,
-                "data": {},
-                "info": {},
-                "code": 200,
-            }
-
+            else:
+                return {
+                    "success": False,
+                    "data": [],
+                    "info": {"message": "not match password"},
+                    "code": 401,
+                }
         else:
             return {
                 "success": False,
@@ -43,6 +63,53 @@ def new_user_controller(data: User):
 
     except Exception as e:
         ic(e)
+
+
+def login_doc_controller(username, password):
+    """Esta Fucion permite Acceder al login ."""
+    try:
+        # Search User
+        rs = search_query(
+            query="auth.users",
+            fields=["password", "email", "created_at"],
+            where={"username": username},
+        )
+
+        ic(rs)
+
+        info = json.loads(rs)
+
+        # Valid if exist user
+        if len(info) > 0:
+            # Valid if password it's match
+            if checkPasswd(password, info[0].get("password")):
+                print("creando token")
+                token = write_token(
+                    {
+                        "username": username,
+                        "email": info[0].get("email"),
+                        "permissions": ["admin", "user:read", "user:write"],
+                    }
+                )
+                return {"token": token}
+
+            else:
+                return {
+                    "success": False,
+                    "data": [],
+                    "info": {"message": "not match password"},
+                    "code": 401,
+                }
+        else:
+            return {
+                "success": False,
+                "data": [],
+                "info": {"message": "not match username"},
+                "code": 401,
+            }
+
+    except Exception as e:
+        print("----- Exception loginController ----- ")
         print(
             type(e).__name__,
             __file__,
@@ -51,3 +118,55 @@ def new_user_controller(data: User):
         print(str(e))
         print("---------- ")
         return "error"
+
+
+def new_user_controller(data: User) -> RequestResponse:
+    """Esta Fucion permite Acceder al login ."""
+
+    try:
+
+        data.password = createPasswd(data.password)
+
+        # Search User
+        result_body_json = dict((x, y) for x, y in data)
+
+        max_id_field = max_seq_table(table="auth.users", field="id_users")
+
+        result_body_json.update(max_id_field)
+
+        ic(result_body_json)
+
+        response_controller = insert_query(
+            table="auth.users", data_insert=result_body_json
+        )
+
+        ic(response_controller)
+        ic(type(response_controller))
+
+        # Validar que data sea un diccionario
+        if not isinstance(response_controller, dict):
+            raise TypeError("Los datos deben ser un diccionario.")
+
+        # Valid if exist user
+        if response_controller.get("success") == True:
+            request_response: RequestResponse = RequestResponse(
+                success=True, info=response_controller, code=200
+            )
+
+            return request_response
+
+        else:
+
+            request_response: RequestResponse = RequestResponse(
+                success=False, info=response_controller, code=401
+            )
+
+            return request_response
+    except Exception as e:
+        ic(e)
+
+        request_response: RequestResponse = RequestResponse(
+            success=False, info={"message": "error no controlado"}, code=500
+        )
+
+        return request_response

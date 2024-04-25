@@ -1,4 +1,5 @@
-# Import JSON module
+""" Import JSON module """
+
 from typing import Optional
 
 
@@ -15,32 +16,35 @@ class SqlTools:
         order: Optional[dict] = None,
         limit: Optional[int] = None,
     ) -> str:
+        """
+        Generate a SELECT query based on the provided parameters.
 
+        Args:
+            table (str): The name of the table to select from.
+            fields (list): The list of fields to select.
+            where (Optional[dict], optional): The WHERE clause as a dictionary of column-value pairs. Defaults to None.
+            order (Optional[dict], optional): The ORDER BY clause as a dictionary of column-direction pairs. Defaults to None.
+            limit (Optional[int], optional): The LIMIT clause specifying the maximum number of rows to return. Defaults to None.
+
+        Returns:
+            str: The generated SELECT query.
+        """
         if isinstance(fields, list):
-            # list_field = ", ".join([str(elem) for elem in fields])
             list_field = ", ".join(fields)
         else:
             list_field = "*"
 
         query = f"SELECT {list_field} FROM {table}"
 
-        i = 0
-
         if where is not None:
-            for i, (key, value) in enumerate(where.items()):
-                if i == 0:
-                    query += " WHERE "
-                else:
-                    query += " AND "
-                query += "{}='{}'".format(key, value)
+            query += " WHERE " + " AND ".join(
+                [f"{key}='{value}'" for key, value in where.items()]
+            )
 
         if order is not None:
-            for i, (key, value) in enumerate(order.items()):
-                if i == 0:
-                    query += " ORDER BY "
-                else:
-                    query += " , "
-                query += "{} {}".format(key, value)
+            query += " ORDER BY " + ", ".join(
+                [f"{key} {value}" for key, value in order.items()]
+            )
 
         if limit is not None:
             query += f" LIMIT {limit}"
@@ -48,12 +52,77 @@ class SqlTools:
         query += ";"
         return query
 
-    def insert(self, table: str, data: dict):
-        query = f"INSERT INTO {table} "
-        query += ' ("{}") values  '.format('", "'.join(data.keys()))
-        query += " ('{}') ".format("', '".join(data.values()))
-        query += ";"
-        return query
+    def generate_insert_query(self, table_name: str, data: dict) -> str:
+        try:
+            # Validar que table_name no esté vacío
+            if not table_name:
+                raise ValueError("El nombre de la tabla no puede estar vacío.")
+
+            # Validar que data sea un diccionario
+            if not isinstance(data, dict):
+                raise TypeError("Los datos deben ser un diccionario.")
+
+            # Validar que data no esté vacío
+            if not data:
+                raise ValueError("El diccionario de datos no puede estar vacío.")
+
+            # Crear la lista de columnas y valores a partir del diccionario de datos
+            columns = ", ".join(data.keys())
+            values = ", ".join([f"'{value}'" for value in data.values()])
+
+            # Crear la consulta SQL
+            query = f"INSERT INTO {table_name} ({columns}) VALUES ({values});"
+
+            # Imprimir el string de la consulta SQL
+            print(query)
+            return query
+
+        except (TypeError, ValueError) as e:
+            print(f"Error: {e}")
+
+    def generate_insert_query_multiple(self, table_name: str, data: list):
+        try:
+            # Validar que table_name no esté vacío
+            if not table_name:
+                raise ValueError("El nombre de la tabla no puede estar vacío.")
+
+            # Validar que data sea una lista de diccionarios o un solo diccionario
+            if not isinstance(data, (dict, list)):
+                raise TypeError(
+                    "Los datos deben ser un diccionario o una lista de diccionarios."
+                )
+
+            # Si data es un diccionario, convertirlo a una lista con un solo diccionario
+            if isinstance(data, dict):
+                data = [data]
+
+            # Verificar si data está vacío
+            if not data:
+                raise ValueError(
+                    "El diccionario o lista de datos no puede estar vacío."
+                )
+
+            # Crear la lista de columnas a partir del primer registro
+            columns = ", ".join(data[0].keys())
+
+            # Crear la lista de valores para múltiples registros
+            values_list = []
+            for record in data:
+                values = ", ".join([f"'{value}'" for value in record.values()])
+                values_list.append(f"({values})")
+
+            # Unir todos los conjuntos de valores en una sola instrucción
+            values_str = ", ".join(values_list)
+
+            # Crear la consulta SQL de inserción múltiple
+            query = f"INSERT INTO {table_name} ({columns}) VALUES {values_str};"
+
+            # Imprimir el string de la consulta SQL
+            print(query)
+            return query
+
+        except (TypeError, ValueError) as e:
+            print(f"Error: {e}")
 
     def insert_multiples_stament(self, table: str, data: list) -> str:
         query = f"INSERT INTO {table} "
@@ -76,76 +145,22 @@ class SqlTools:
         query += ";"
         return query
 
+    def filter(self, table, fields: list, **kwargs):
 
-def filter(table, fields: list, **kwargs):
+        if type(fields) is list:
+            # list_field = ", ".join([str(elem) for elem in fields])
+            list_field = ", ".join(fields)
 
-    if type(fields) is list:
-        # list_field = ", ".join([str(elem) for elem in fields])
-        list_field = ", ".join(fields)
+        query = f"SELECT {list_field} FROM {table}"
 
-    query = f"SELECT {list_field} FROM {table}"
+        i = 0
 
-    i = 0
-
-    for key, value in kwargs.items():
-        if i == 0:
-            query += " WHERE "
-        else:
-            query += " AND "
-        query += "{}='{}'".format(key, value)
-        i += 1
-    query += ";"
-    return query
-
-
-info_filter = filter(table="clientes", fields=["nombre", "apellido"], ciudad="Madrid")
-
-
-def pruebas_insert():
-    table = "demo"
-
-    data = {"nombre": "pepe", "apellido": "grillo"}
-
-    db = SqlTools("pg")
-    info_insert_v1 = db.insert(table=table, data=data)
-    print(info_insert_v1)
-
-
-pruebas_insert()
-
-
-def pruebas_insert_multiple():
-    table = "demo"
-
-    data = [
-        {"nombre": "pepe", "apellido": "grillo"},
-        {"nombre": "marlon", "apellido": "arias"},
-    ]
-
-    db = SqlTools("pg")
-    info_insert_v1 = db.insert_multiples(table=table, data=data)
-    print(info_insert_v1)
-
-
-pruebas_insert_multiple()
-
-
-def pruebas_select():
-    db = SqlTools("pg")
-    table = "clientes"
-    fields = ["nombre", "apellido"]
-    where = {"nombre": "token", "apellido": "arias"}
-    order = {"estado": "ASC"}
-    limit = 10
-
-    info_filter_v1 = db.select(table, fields)
-    info_filter_v2 = db.select(table, fields, where)
-    info_filter_v3 = db.select(table=table, fields=fields, where=where, order=order)
-    info_filter_v4 = db.select(
-        table=table, fields=fields, where=where, order=order, limit=limit
-    )
-
-    print(info_filter_v1)
-    print(info_filter_v2)
-    print(info_filter_v3)
-    print(info_filter_v4)
+        for key, value in kwargs.items():
+            if i == 0:
+                query += " WHERE "
+            else:
+                query += " AND "
+            query += "{}='{}'".format(key, value)
+            i += 1
+        query += ";"
+        return query

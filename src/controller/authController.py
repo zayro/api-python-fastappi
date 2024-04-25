@@ -16,8 +16,6 @@ def login_controller(data: Login):
     """Esta Fucion permite Acceder al login ."""
     try:
 
-        ic()
-
         # Search User
         rs = search_query(
             table="auth.users",
@@ -131,12 +129,3 @@ def login_doc_controller(username, password):
         return "error"
     finally:
         db.close()
-
-
-"""
-info =  Login(username= 'zayrod', password= '123456')
-
-login(info)
-
- 
-  """

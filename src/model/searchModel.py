@@ -3,21 +3,18 @@
 from pydantic import BaseModel
 
 
-class Search(BaseModel): 
+class Search(BaseModel):
     """Clase Busqueda"""
 
     query: str
-    fields: list | str
-    where: dict | None = {}
+    fields: list | str = "*"
+    where: dict | None = None
+    order: dict | None = None
+    limit: int | None = None
     model_config = {
         "json_schema_extra": {
             "examples": [
                 {"query": "demo.prueba", "fields": "*"},
-                {
-                    "from": "prueba",
-                    "fields": ["id", "nombre"],
-                    "order": [{"column": "id", "order": "desc"}],
-                },
             ]
         }
     }

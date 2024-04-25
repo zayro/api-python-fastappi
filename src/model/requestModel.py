@@ -1,7 +1,8 @@
 from pydantic import BaseModel
 
-class Insert(BaseModel): 
-    insert: str
-    values: list[dict]
 
-    
+class RequestResponse(BaseModel):
+    data: list[dict] | None = []
+    success: bool
+    info: dict | None = {}
+    code: int
