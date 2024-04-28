@@ -78,7 +78,6 @@ def query_prueba_redis():
         print(e.errors())
 
 
-@cache(days=1)
 def query_prueba_cache():
     """Esta Fucion permite Acceder al login ."""
     print("ingreso a query_prueba_controller")

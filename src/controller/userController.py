@@ -1,10 +1,16 @@
 import json
+from pydantic import ValidationError
 from src.service.logService import ic
-from src.model.userModel import User
+from src.model.userModel import User, UserPasswordChange
 from src.model.requestModel import RequestResponse
 from src.model.authModel import Login
-from src.database.postgredb.connect import search_query, insert_query, max_seq_table
+from src.database.postgredb.connect import search_query
 from src.tools.toolsBcript import checkPasswd, createPasswd
+from src.database.repository.query_user import (
+    auth_user,
+    create_user,
+    update_password_user,
+)
 from src.service.tokenService import write_token
 
 
@@ -13,15 +19,7 @@ def login_controller(data: Login):
     try:
 
         # Search User
-        rs = search_query(
-            query="auth.users",
-            fields=["password", "email", "created_at"],
-            where={"username": data.username},
-        )
-
-        ic(rs)
-
-        info = json.loads(rs)
+        info = auth_user(data)
 
         # Valid if exist user
         if len(info) > 0:
@@ -127,18 +125,9 @@ def new_user_controller(data: User) -> RequestResponse:
 
         data.password = createPasswd(data.password)
 
-        # Search User
-        result_body_json = dict((x, y) for x, y in data)
+        # Search User        result_body_json = dict((x, y) for x, y in data)
 
-        max_id_field = max_seq_table(table="auth.users", field="id_users")
-
-        result_body_json.update(max_id_field)
-
-        ic(result_body_json)
-
-        response_controller = insert_query(
-            table="auth.users", data_insert=result_body_json
-        )
+        response_controller: dict = create_user(data.model_dump())
 
         ic(response_controller)
         ic(type(response_controller))
@@ -162,7 +151,38 @@ def new_user_controller(data: User) -> RequestResponse:
             )
 
             return request_response
-    except Exception as e:
+    except (ValidationError, TypeError) as e:
+        ic(e)
+
+        request_response: RequestResponse = RequestResponse(
+            success=False, info={"message": "error no controlado"}, code=500
+        )
+
+        return request_response
+
+
+def update_user_controller(data: UserPasswordChange) -> RequestResponse:
+    """Esta Fucion permite Acceder al login ."""
+    try:
+
+        # Search User   result_body_json = dict((x, y) for x, y in data)
+
+        response_update_password_user: dict = update_password_user(data)
+
+        ic(response_update_password_user)
+        ic(type(response_update_password_user))
+
+        # Validar que data sea un diccionario
+        if not isinstance(response_update_password_user, dict):
+            raise TypeError("Los datos deben ser un diccionario.")
+
+        response_update_password_user.update({"code": 200})
+
+        ic(response_update_password_user)
+
+        return response_update_password_user
+
+    except (ValidationError, TypeError) as e:
         ic(e)
 
         request_response: RequestResponse = RequestResponse(

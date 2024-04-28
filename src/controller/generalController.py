@@ -1,11 +1,12 @@
 """Imports."""
 
 import json
-from src.service.logService import ic
+
 from pydantic import ValidationError
 from src.model.searchModel import Search
+from src.model.requestModel import RequestResponse
 from src.database.postgredb.db_pg_medoo import Database
-
+from src.service.logService import ic
 from src.database.postgredb.connect import search_query
 
 """ import sys
@@ -39,15 +40,19 @@ def search_controller(data: Search):
         db.close()
 
 
-def search_controllers(data: Search):
+def search_controllers(data: Search) -> RequestResponse:
     """Esta Fucion permite Acceder al login ."""
     try:
 
         ic(data.model_dump())
 
-        info = search_query(**data.model_dump())
+        info: dict = search_query(**data.model_dump())
 
-        return {"success": True, "data": json.loads(info), "code": 200}
+        info.update({"code": 200})
+
+        ic(info)
+
+        return info
 
     except ValidationError as e:
         ic(e.errors())

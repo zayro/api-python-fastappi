@@ -7,12 +7,11 @@ returned as a dictionary containing the incremented value under the key "id_user
 """
 
 import sys
-import json
-import datetime
 from typing import Optional
 import psycopg2.extras
 from src.service.logService import ic
 from src.tools.sql import SqlTools
+from src.tools.convert import sql_data
 from config.settings import Enviroment
 
 
@@ -60,18 +59,33 @@ def connect():
             print("Error al cerrar la conexion")
 
 
-def execute_sql(sql: str):
-    """Retrieve data from the table"""
-    ic(sql)
+def execute_sql(
+    sql: str, params: Optional[list] = None, autocommit: Optional[bool] = True
+) -> dict:
+    """Execute Sql Postgresql"""
     try:
         with connect() as conn:
-            with conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor) as cur:
-                cur.execute(sql)
-                result = cur.fetchone()
-                return result
 
-    except psycopg2.DatabaseError as error:
-        print(error)
+            conn.autocommit = autocommit
+            with conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor) as cur:
+                cur.execute(sql, params)
+                print("The number of result: ", cur.rowcount)
+                json_data = sql_data(cur.fetchall())
+                # ic(json_data)
+                cur.close()
+
+                return {
+                    "success": True,
+                    "data": json_data,
+                }
+
+    except (psycopg2.DatabaseError, TypeError) as error:
+        ic(error)
+        return {
+            "success": False,
+            "message": "Error al ejecutar la consulta",
+            "error": str(error),
+        }
 
 
 def max_seq_table(
@@ -108,26 +122,7 @@ def search_query(
     )
 
     ic(sql)
-
-    try:
-        with connect() as conn:
-            with conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor) as cur:
-                cur.execute(sql)
-                print("The number of result: ", cur.rowcount)
-                result = []
-                for row in cur.fetchall():
-                    result.append(
-                        {key: convertir_a_json(value) for key, value in row.items()}
-                    )
-
-                json_data = json.dumps(result, sort_keys=True)
-                ic(json_data)
-                cur.close()
-
-                return json_data
-
-    except psycopg2.DatabaseError as error:
-        print(error)
+    return execute_sql(sql)
 
 
 def insert_query(table: str, data_insert: dict):
@@ -156,16 +151,3 @@ def insert_query(table: str, data_insert: dict):
             "message": "Error al ejecutar la consulta",
             "error": str(error),
         }
-
-
-def convertir_a_json(valor):
-    if isinstance(valor, datetime.datetime):
-        return valor.isoformat()
-    elif isinstance(valor, bytes):
-        return valor.decode("utf-8")
-    elif isinstance(valor, dict):
-        return {key: convertir_a_json(v) for key, v in valor.items()}
-    elif isinstance(valor, list):
-        return [convertir_a_json(v) for v in valor]
-    else:
-        return valor

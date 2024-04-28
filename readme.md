@@ -2,8 +2,6 @@
 
 - pip install -r requirements.txt
 
-### Update Package
-
 - pip install pip-upgrader
 
 ## Enviroment
@@ -35,5 +33,7 @@
 - pip show fastapi
 
 ### Bibliografia
+
+#### Cors
 
 - <https://www.slingacademy.com/article/fastapi-allowing-requests-from-other-origins-cors/>

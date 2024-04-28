@@ -1,14 +1,16 @@
 """Route Login."""
 
 from fastapi import APIRouter, Form
+from pydantic import ValidationError
 from src.service.logService import ic
-from src.model.userModel import User
+from src.model.userModel import User, UserPasswordChange
 from src.model.authModel import Login
 from src.model.requestModel import RequestResponse
 from src.model.tokenModel import Token
 from src.service.httpResponseService import http_response_code
 from src.controller.userController import (
     new_user_controller,
+    update_user_controller,
     login_controller,
     login_doc_controller,
 )
@@ -71,8 +73,6 @@ def login_doc(username: str = Form(), password: str = Form()) -> Token:
 
     except TypeError as e:
         message_type_error(e)
-    except Exception as e:
-        message_exception_error(e, "error")
 
 
 @user.post("/new")
@@ -102,3 +102,23 @@ def new_user(data: User):
         message_type_error(e)
     except Exception as e:
         message_exception_error(e, "error")
+
+
+@user.put("/updatePassword")
+def update_password(data: UserPasswordChange) -> RequestResponse:
+    """Route to Logear user."""
+    try:
+        rs: RequestResponse = update_user_controller(data)
+        ic(type(rs))
+        ic(rs)
+        if type(rs) is RequestResponse:
+            return http_response_code(**rs.model_dump())
+        else:
+            return http_response_code(
+                **message_response(
+                    success=False, info={"message": "error no controlado"}, code=500
+                )
+            )
+
+    except (TypeError, ValidationError) as e:
+        message_type_error(e)
