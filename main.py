@@ -1,4 +1,4 @@
-"""RUN PROJECT."""
+"""RUN API PROJECT."""
 
 import uvicorn
 from fastapi import Body, FastAPI, HTTPException, Request, Response, Request, status
@@ -14,16 +14,16 @@ import time
 from datetime import datetime
 
 # Routes
-from src.router.auth import auth
-from src.router.user import user
-from src.router.general import general
-from src.router.query import query
-from src.router.view import view
-from src.router.cache import cache
-from src.router.pdf import pdf
-from src.router.upload import upload
-from src.router.files import files
-from src.router.webSocket import socket
+from src.api.endpoints.v1.router.auth import auth
+from src.api.endpoints.v1.router.user import user
+from src.api.endpoints.v1.router.general import general
+from src.api.endpoints.v1.router.query import query
+from src.api.endpoints.v1.router.view import view
+from src.api.endpoints.v1.router.cache import cache
+from src.api.endpoints.v1.router.pdf import pdf
+from src.api.endpoints.v1.router.upload import upload
+from src.api.endpoints.v1.router.files import files
+from src.api.endpoints.v1.router.webSocket import socket
 
 # INIT APP
 app = FastAPI()
@@ -75,18 +75,11 @@ app.add_middleware(
 def startup_event():
     print("start app")
     start_time = datetime.now()
-    with open("src/log.txt", mode="a") as log:
-        log.write(f"--  \n")
-        log.write(f"Application Start: {start_time}\n")
-        log.close()
 
 
 @app.on_event("shutdown")
 def shutdown_event():
-    start_time = datetime.now()
-    with open("src/log.txt", mode="a") as log:
-        log.write(f"Application shutdown: {start_time}\n")
-        log.close()
+    end_time = datetime.now()
 
 
 app.mount("/public", StaticFiles(directory="public"), name="public")

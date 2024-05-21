@@ -1,95 +1,51 @@
-# Arquitecta Limpia
+# Codigo Limpio
 
-## Dominio
+El Clean Code se refiere a la práctica de escribir código legible, comprensible y fácil de mantener. Un código limpio sigue principios y convenciones que promueven la claridad y la simplicidad, permitiendo a los desarrolladores comprender rápidamente su funcionalidad y realizar modificaciones de manera eficiente.
 
-El dominio es el corazon de una aplicación y tiene que estar totalmente aislado de cualquier dependencia ajena a la lógica o los datos de negocio. El dominio es independiente de cualquier framework o librería y puede ser reutilizado en cualquier aplicación.
+## Principios de Código Limpio
 
-**Entidades**: Son los objetos de negocio que representan el dominio de la aplicación, ejemplos de entidades son: `Usuario`, `Producto`, `Venta`, `Compra`. la nombratura de las entidades debe ser en singular, ejemplo: `UsuarioEntity`, `ProductoEntity`, `VentaEntity`, `CompraEntity`.
+### 1. **Nombres Significativos**
 
-**Repositorios**: Son los encargados de la persistencia de los datos, ejemplos de repositorios son: `UsuarioRepository`, `ProductoRepository`, `VentaRepository`, `CompraRepository`. la nombratura de los repositorios debe ser en singular, ejemplo: `UsuarioRepository`, `ProductoRepository`, `VentaRepository`, `CompraRepository`.
+Los nombres de las variables, funciones y clases deben ser descriptivos y significativos. Los nombres deben reflejar claramente el propósito y la funcionalidad de la entidad que representan.
 
-## Casos de Uso o  Aplicación
+### 2. **Funciones Pequeñas**
 
-Los casos de uso son las acciones que se pueden realizar en la aplicación, cada caso de uso tiene una única responsabilidad y se encarga de una sola acción. Los casos de uso son independientes de cualquier framework o librería y pueden ser reutilizados en cualquier aplicación.
+Las funciones deben ser cortas y realizar una sola tarea. Las funciones largas y complejas son difíciles de entender y mantener. Dividir las funciones en partes más pequeñas facilita la lectura y la modificación del código.
 
-**Interactores**: Son los encargados de la lógica de negocio de la aplicación, ejemplos de interactores son: `CrearUsuario`, `EliminarUsuario`, `ActualizarUsuario`, `ListarUsuarios`. los interactores tambien reciben los nombres de caso de uso y usan una nomenclatura al crear el archivo como
+### 3. **Comentarios Útiles**
 
-**Controladores**: Son los encargados de recibir las peticiones HTTP, llamar a los interactores y devolver una respuesta HTTP, ejemplos de controladores son: `UsuarioController`, `ProductoController`, `VentaController`, `CompraController`.
+Los comentarios deben ser claros y concisos. Deben explicar el propósito y la funcionalidad del código de manera que sea fácil de entender para otros desarrolladores. Los comentarios innecesarios o redundantes deben evitarse.
 
-### Reglas de Negocio
+### 4. **Formato Consistente**
 
-**Validaciones**: Son las reglas que se deben cumplir para que una entidad sea válida, ejemplos de validaciones son: `El email debe ser único`, `La contraseña debe tener al menos 8 caracteres`, `El nombre no puede estar vacío`.
+El código debe seguir un formato consistente y fácil de leer. Se deben utilizar sangrías, espacios y saltos de línea de manera coherente para mejorar la legibilidad del código.
 
-**Excepciones**: Son los errores que se pueden producir en la aplicación, ejemplos de excepciones son: `UsuarioNoEncontrado`, `ProductoNoEncontrado`, `VentaNoEncontrada`, `CompraNoEncontrada`.
+### 5. **Evitar la Repetición**
 
-**Casos de Uso**: Son los casos de uso de la aplicación, ejemplos de casos de uso son: `CrearUsuario`, `EliminarUsuario`, `ActualizarUsuario`, `ListarUsuarios`.
+El código duplicado debe evitarse en la medida de lo posible. La repetición de código dificulta la mantenibilidad y aumenta la probabilidad de errores. Se deben utilizar funciones y clases para reutilizar el código en lugar de repetirlo.
 
-**Servicios**: Son los servicios que se pueden consumir en la aplicación, ejemplos de servicios son: `EnviarEmail`, `EnviarSMS`, `EnviarNotificación`.
+### 6. **Pruebas Automatizadas**
 
-**Eventos**: Son los eventos que se pueden producir en la aplicación, ejemplos de eventos son: `UsuarioCreado`, `UsuarioEliminado`, `UsuarioActualizado`, `UsuarioListado`.
+Es importante escribir pruebas automatizadas para validar el funcionamiento del código. Las pruebas unitarias, de integración y de aceptación son fundamentales para garantizar la calidad y la fiabilidad del software.
 
-**Notificaciones**: Son las notificaciones que se pueden enviar en la aplicación, ejemplos de notificaciones son: `EmailEnviado`, `SMSEnviado`, `NotificaciónEnviada`.
+### 7. **Refactorización Continua**
 
-**Middlewares**: Son funciones que se ejecutan antes de llegar a los controladores, ejemplos de middlewares son: `authMiddleware`, `adminMiddleware`, `loggerMiddleware`.
+La refactorización es el proceso de mejorar la estructura y el diseño del código sin cambiar su funcionalidad. La refactorización continua ayuda a mantener el código limpio y organizado, facilitando su comprensión y modificación.
 
-**Serializadores**: Son los encargados de transformar los datos de la aplicación a un formato específico, ejemplos de serializadores son: `UsuarioSerializer`, `ProductoSerializer`, `VentaSerializer`, `CompraSerializer`.
+### 8. **Simplicidad y Claridad**
 
-## Infraestructura
+El código debe ser simple y claro. Evitar la complejidad innecesaria y los trucos de programación complicados. La simplicidad y la claridad son clave para un código limpio y fácil de mantener.
 
-son los elementos externos con los que se comunica la aplicación, tanto de entrada como de salida, como bases de datos, servicios, APIs, etc. La infraestructura es independiente de cualquier framework o librería y puede ser reutilizada en cualquier aplicación.
+### 9. **Responsabilidad Única**
 
-**Adaptadores**: Son los encargados de adaptar la aplicación a un framework o librería, ejemplos de adaptadores son: `ExpressAdapter`, `SequelizeAdapter`, `MongooseAdapter`.
+Cada función, clase o módulo debe tener una única responsabilidad. Evitar la sobrecarga de funcionalidades en una sola entidad y dividir las responsabilidades en partes más pequeñas y manejables.
 
-**entry-point**: Es el punto de entrada de la aplicación, ejemplos de entry-point son: `index`, `app`.
+### 10. **Consistencia y Coherencia**
 
-**Rutas**: Son los encargados de definir las rutas de la aplicación, ejemplos de rutas son: `GET /usuarios`, `POST /usuarios`, `PUT /usuarios`, `DELETE /usuarios`, se usan en la capa de infraestructura especificamente en el entry-point.
+Mantener la consistencia y la coherencia en todo el código. Utilizar convenciones de nomenclatura, estructuras de código y estilos de programación coherentes en todo el proyecto.
 
-**config**: Son los archivos de configuración de la aplicación, ejemplos de configuraciones son: `database`, `email`, `sms`.
+## Bibliografia
 
-**helpers**: Son funciones de ayuda que se pueden reutilizar en la aplicación, ejemplos de helpers son: `validarEmail`, `validarPassword`.
+- [Clean Code: A Handbook of Agile Software Craftsmanship](https://www.amazon.com/Clean-Code-Handbook-Software-Craftsmanship/dp/0132350882) by Robert C. Martin
 
-## Ejemplo
-
-api/
-├── src/
-│   ├── application/
-│   │   ├── controllers.py
-│   │   ├── usecases/
-│   │   │   ├── crear_usuario.py
-│   │   │   └── actualizar_usuario.py
-│   ├── domain/
-│   │   ├── entities.py
-│   │   ├── value_objects.py
-│   ├── infrastructure/
-│   │   ├── adapters/
-│   │   │   ├── repositorio_usuarios_postgresql.py
-│   │   │   ├── cache_usuarios_redis.py
-│   │   │   └── controlador_mensajes_rabbitmq.py
-│   │   ├── drivers/
-│   │   │   ├── postgresql_driver.py
-│   │   │   └── redis_driver.py
-│   ├── www/
-│   │   ├── http/
-│   │   │   ├── controladores.py
-│   │   │   └── rutas.py
-│   └── main.py
-├── requirements.txt
-├── README.md
-└── tests/
-    ├── application/
-    │   ├── test_controllers.py
-    │   └── test_usecases.py
-    ├── domain/
-    │   └── test_entities.py
-    └── infrastructure/
-        └── test_adapters.py
-
-### Bibliografia
-
-#### Arquitectura limpia
-
-* <https://www.linkedin.com/pulse/clean-architecture-en-node-y-express-odannys-de-la-cruz/>
-
-#### Codigo Limpio
-
-* <https://github.com/andersontr15/clean-code-javascript-es>
+- <https://medium.com/@javiperezrequejo/clean-code-la-importancia-de-la-elegancia-en-la-programaci%C3%B3n-4cd15195185c#:~:text=El%20Clean%20Code%20se%20refiere,realizar%20modificaciones%20de%20manera%20eficiente>.

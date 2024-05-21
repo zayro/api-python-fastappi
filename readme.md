@@ -4,6 +4,8 @@
 
 - pip install pip-upgrader
 
+- docker pull couchdb:3.3.3
+
 ## Enviroment
 
 - virtualenv api
