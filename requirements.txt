@@ -23,6 +23,7 @@ mariadb
 psycopg2
 redis
 aioredis
+couchdb
 #ORM
 sqlalchemy
 medoo

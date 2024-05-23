@@ -1,11 +1,11 @@
 import json
 from pydantic import ValidationError
-from src.database.postgredb.db_pg_medoo import Database
-from infrastructure.redis.redisService import RedisApi
-from src.service.datetimeService import time_to_miliseconds
-from api.decorators.cacheService import cache
-from src.tools.messageResponse import message_type_error, message_exception_error
-from infrastructure.redis.rateLimit import rate_limit, cache_limit
+from src.infrastructure.database.orm.db_pg_medoo import Database
+from src.infrastructure.redis.redisService import RedisApi
+from src.utils.datetime_utils import time_to_miliseconds
+from src.api.decorators.cacheService import cache
+from src.api.http.http_exceptions import http_exception_general
+from src.infrastructure.redis.rateLimit import rate_limit, cache_limit
 
 
 @rate_limit(max_requests=2, window=60)
@@ -34,17 +34,10 @@ async def query_rate_limit(request):
                 "code": 202,
             }
 
-    except ValidationError as e:
-        message_exception_error(e, "query_rate_limit ValidationError")
-    except TypeError as e:
-        message_exception_error(e, "query_rate_limit TypeError")
-    except Exception as e:
-        message_exception_error(e, "query_rate_limit Exception")
-        return {
-            "success": False,
-            "data": [],
-            "info": {"error": "Error al formar Sql", "message": type(e).__name__},
-        }
+    except (ValidationError, TypeError, Exception) as e:
+        print(e)
+        http_exception_general("query_rate_limit ValidationError")
+        
 
 
 @cache_limit("demo_prueba", 1)
@@ -57,18 +50,10 @@ async def query_cache_limit():
         info = db.query("select  * from demo.prueba").export("json")
         return {"success": True, "data": json.loads(info), "info": {}, "code": 202}
 
-    except ValidationError as e:
-        message_exception_error(e, "query_rate_limit ValidationError")
-    except TypeError as e:
-        message_exception_error(e, "query_rate_limit TypeError")
-    except Exception as e:
-        message_exception_error(e, "query_rate_limit Exception")
-        return {
-            "success": False,
-            "data": [],
-            "info": {"error": "Error al formar Sql", "message": type(e).__name__},
-        }
-
+    except (ValidationError, TypeError, Exception) as e:
+        print(e)
+        http_exception_general("query_rate_limit ValidationError")
+ 
 
 def query_prueba_redis():
     """Esta Fucion permite Acceder al login ."""
@@ -97,20 +82,9 @@ def query_prueba_redis():
                 "code": 202,
             }
 
-    except TypeError as e:
-        message_type_error(e)
-        message_exception_error(e, "query_prueba_controller TypeError")
-    except Exception as e:
+    except (ValidationError, TypeError, Exception) as e:
         print(e)
-        message_exception_error(e, "query_prueba_controller Exception")
-        return {
-            "success": False,
-            "data": [],
-            "info": {"error": "Error al formar Sql", "message": type(e).__name__},
-        }
-    except ValidationError as e:
-        message_exception_error(e, "query_prueba_controller ValidationError")
-        print(e.errors())
+        http_exception_general("query_rate_limit ValidationError")
 
 
 @cache(days=1)
@@ -123,19 +97,8 @@ def query_prueba_cache():
         info = db.query("select  * from demo.prueba").export("json")
         return {"success": True, "data": json.loads(info), "info": {}, "code": 200}
 
-    except TypeError as e:
-        message_type_error(e)
-        message_exception_error(e, "query_prueba_controller TypeError")
-    except Exception as e:
+    except (ValidationError, TypeError, Exception) as e:
         print(e)
-        message_exception_error(e, "query_prueba_controller Exception")
-        return {
-            "success": False,
-            "data": [],
-            "info": {"error": "Error al formar Sql", "message": type(e).__name__},
-        }
-    except ValidationError as e:
-        message_exception_error(e, "query_prueba_controller ValidationError")
-        print(e.errors())
+        http_exception_general("query_rate_limit ValidationError")
     finally:
         db.close()

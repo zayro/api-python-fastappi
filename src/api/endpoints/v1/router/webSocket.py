@@ -1,10 +1,9 @@
 # main.py
 from datetime import datetime
 from fastapi import APIRouter, WebSocket, WebSocketDisconnect
-from infrastructure.websocket.websocketService import (
-    ConnectionManager,
-    ConnectionWebsocket,
-)
+from src.infrastructure.websocket.websocketService import ConnectionManager,  ConnectionWebsocket
+
+# from src.infrastructure.database.couchdb.db import connect_to_couchdb
 
 manager = ConnectionManager()
 connectionWebsocket = ConnectionWebsocket()

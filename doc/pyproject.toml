@@ -1,0 +1,19 @@
+[tool.black]
+line-length = 100
+indent = space
+indent-size = 4
+wrap = always
+string-normalization = upper
+comment-indentation = true
+import-sorting = alphabetical
+except = chained
+class-definition = separate-header
+function-definition = separate-header
+target-version = "3.7"
+ignore = [
+    "*.test",
+    "venv",
+    ".venv",
+    ".pytest_cache",
+    ".mypy_cache"
+]

@@ -5,9 +5,7 @@ from typing import List, Optional
 from pydantic import ValidationError
 from src.core.config import settings
 from src.domain.entity.user_entity import User, UserLogin, UserPasswordChange
-from infrastructure.log.logService import ic
-
-# from src.domain.repository.user_repository import IUserRepository
+from src.infrastructure.log.logService import ic
 
 
 class UserRepository:
@@ -111,9 +109,7 @@ class UserRepository:
             if result:
                 print(result)
                 id_users, username, email, password = result[0]
-                return User(
-                    id_users=id_users, username=username, email=email, password=password
-                )
+                return User(id_users=id_users, username=username, email=email, password=password)
             return None
         except (ValidationError, TypeError) as e:
             print("----- Exception General Database ----- ")
@@ -130,9 +126,7 @@ class UserRepository:
             users = []
             for row in result:
                 id_users, username, email, password = row
-                user = User(
-                    id_users=id_users, username=username, email=email, password=password
-                )
+                user = User(id_users=id_users, username=username, email=email, password=password)
                 users.append(user)
             return users
         except (ValidationError, TypeError) as e:
@@ -167,9 +161,7 @@ class UserRepository:
     def auth_user(self, login: UserLogin) -> dict:
         """Execute Sql Postgresql"""
         ic(login)
-        sql = (
-            """ SELECT email, username, password FROM auth.users WHERE username = %s """
-        )
+        sql = """ SELECT email, username, password FROM auth.users WHERE username = %s """
         return self._execute_query(sql, (login.username))
 
     def update_password_user(self, data: UserPasswordChange) -> dict:
@@ -190,9 +182,7 @@ class UserRepository:
 
                 with conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor) as cur:
 
-                    sql_max_id_field_user = (
-                        """SELECT MAX(id_users) + 1 as id_users FROM auth.users """
-                    )
+                    sql_max_id_field_user = """SELECT MAX(id_users) + 1 as id_users FROM auth.users """
 
                     cur.execute(sql_max_id_field_user)
 
@@ -202,7 +192,9 @@ class UserRepository:
 
                     payload_user.update(execute_max_id_field_user)
 
-                    sql_insert_user = """INSERT INTO auth.users (id_users, username, password, email) VALUES (%(id_users)s, %(username)s, %(password)s, %(email)s) RETURNING id_users"""
+                    sql_insert_user = (
+                        """INSERT INTO auth.users (id_users, username, password, email) VALUES (%(id_users)s, %(username)s, %(password)s, %(email)s) RETURNING id_users"""
+                    )
 
                     cur.execute(sql_insert_user, payload_user)
 

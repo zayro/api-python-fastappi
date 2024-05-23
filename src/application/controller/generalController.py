@@ -3,11 +3,11 @@
 import json
 
 from pydantic import ValidationError
-from src.model.searchModel import Search
-from src.model.requestModel import RequestResponse
-from src.database.postgredb.db_pg_medoo import Database
-from infrastructure.log.logService import ic
-from src.database.postgredb.connect import search_query
+from src.domain.model.search_model import Search
+from src.domain.model.request_model import RequestResponse
+from src.infrastructure.database.orm.db_pg_medoo import Database
+from src.infrastructure.log.logService import ic
+from src.infrastructure.database.postgredb.connect import search_query
 
 """ import sys
 sys.path.append('..')

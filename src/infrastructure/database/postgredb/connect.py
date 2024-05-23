@@ -9,9 +9,9 @@ returned as a dictionary containing the incremented value under the key "id_user
 import sys
 from typing import Optional
 import psycopg2.extras
-from infrastructure.log.logService import ic
-from src.tools.sql import SqlTools
-from src.tools.convert import sql_data
+from src.infrastructure.log.logService import ic
+from src.utils.sql_utils import SqlTools
+from src.utils.convert_json_utils import sql_data
 from config.settings import Enviroment
 
 

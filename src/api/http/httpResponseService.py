@@ -2,17 +2,16 @@ from fastapi import status, HTTPException
 from fastapi.responses import JSONResponse
 
 
-def HttpResponse(status: bool, message, **info):
+def http_response(status: bool, message, **info):
     if status is False:
-        raise HTTPException(status_code=500, detail={
-                            "success": status,  "error": message})
+        raise HTTPException(status_code=500, detail={"success": status, "error": message})
     return {"success": status, "data": message, "info": info}
 
 
 def http_response_code(**data):
     """Response Request."""
-    code = data.get('code', 500)
-    header = data.get('header', {})
+    code = data.get("code", 500)
+    header = data.get("header", {})
 
     if code == 200:
         status_code = status.HTTP_200_OK

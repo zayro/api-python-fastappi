@@ -13,15 +13,8 @@
     },
 
     "python.linting.pycodestyleEnabled": true,
-
-    "python.linting.pydocstyleEnabled": true,
-
-    "python.formatting.provider": "none",
-
-    "python.formatting.autopep8Args": ["--aggressive", "--aggressive"],
-
     "python.linting.pycodestyleArgs": ["--max-line-length=160"],
-    "python.formatting.blackArgs": ["--line-length=140"],
+    "editor.defaultFormatter": "ms-python.black-formatter",
     "python.analysis.autoFormatStrings": true,
     "python.analysis.autoImportCompletions": true,
     "python.analysis.completeFunctionParens": true,
@@ -44,5 +37,11 @@
             "icon": "ceylon",
             "extensions": ["pg", "pgdb"]
         }
-    ]
+    ],
+    "python.terminal.activateEnvInCurrentTerminal": true,
+    "python.testing.pytestEnabled": true,
+    "black-formatter.args": ["--line-length", "180"],
+    "zenMode.hideLineNumbers": false,
+    "search.showLineNumbers": true,
+    "editor.rulers": [140]
 }

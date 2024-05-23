@@ -1,0 +1,36 @@
+# Longitud máxima de línea
+line-length = 120
+
+# Modo de formato
+mode = safe
+
+# Estilo de sangría
+indent = space
+indent-size = 4
+
+# Envoltura de texto
+wrap = after
+
+# Formato de cadenas
+string-normalization = upper
+
+# Formato de comentarios
+comment-indentation = true
+
+# Formato de importaciones
+import-sorting = alphabetical
+
+# Formato de excepciones
+except = chained
+
+# Formato de clases
+class-definition = separate-header
+
+# Formato de funciones
+function-definition = separate-header
+
+# Versión mínima de Python
+target-version = 3.7
+
+# Excluir archivos con extensión .test
+ignore = *.test

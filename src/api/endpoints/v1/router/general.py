@@ -1,17 +1,12 @@
 """Imports."""
 
 from fastapi import Depends, APIRouter
-from infrastructure.log.logService import ic
-from src.model.searchModel import Search
-from src.middleware.token import validate_current_token
-from api.http.httpResponseService import http_response_code
-from src.controller.generalController import search_controller, search_controllers
-from src.tools.messageResponse import (
-    message_response,
-    message_type_error,
-    message_exception_error,
-)
-
+from src.infrastructure.log.logService import ic
+from src.domain.model.search_model import Search
+from src.api.middleware.token_middleware import validate_current_token
+from src.api.http.httpResponseService import http_response_code
+from src.application.controller.generalController import search_controller, search_controllers
+ 
 
 general = APIRouter(prefix="/api/v1/general")
 
@@ -36,21 +31,8 @@ async def find(data: Search):
             **message_response(success=False, info={"message": str(e)}, code=500)
         )
     except Exception as e:
-        print("----- Exception Database... ----- ")
-        print(
-            type(e).__name__,  # TypeError
-            __file__,  # /tmp/example.py
-            e.__traceback__.tb_lineno,  # 2
-            "error database",
-        )
-        print("--------- ERROR STR ----------- \n ")
-        print(str(e))
-        print("-------------------- \n")
-        return http_response_code(
-            **message_response(
-                success=False, info={"message": str(type(e).__name__)}, code=500
-            )
-        )
+        print("----- Exception Database... ----- ", e)
+    
 
 
 @general.post(
@@ -68,8 +50,4 @@ async def search(data: Search):
 
     except (TypeError, ValueError) as e:
         ic(e)
-        return http_response_code(
-            **message_response(
-                success=False, info={"message": str(type(e).__name__)}, code=500
-            )
-        )
+     

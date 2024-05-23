@@ -1,15 +1,12 @@
 """Route Login."""
 
-from fastapi import APIRouter, Form
-from api.http.httpResponseService import http_response_code
-from src.model.authModel import Login
-from src.model.tokenModel import Token
-from src.controller.authController import login_controller, login_doc_controller
-from src.tools.messageResponse import (
-    message_response,
-    message_type_error,
-    message_exception_error,
-)
+from fastapi import APIRouter, Form, status, HTTPException
+from src.api.http.httpResponseService import http_response_code
+from src.domain.model.auth_model import Login
+from src.domain.model.token_model import Token
+from src.application.controller.authController import login_controller, login_doc_controller
+from src.api.http.http_json_responses import http_response_code
+
 
 auth = APIRouter(prefix="/api/v1", responses={404: {"description": "Not found"}})
 
@@ -29,16 +26,12 @@ def login(data: Login):
                 print("error info login")
                 return http_response_code(**rs)
         else:
-            return http_response_code(
-                **message_response(
-                    success=False, info={"message": "error no controlado"}, code=500
-                )
-            )
+            
+            raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Error no controlado")
 
-    except TypeError as e:
-        message_type_error(e)
-    except Exception as e:
-        message_exception_error(e, "error")
+    except (TypeError, Exception)  as e:
+        print(e)
+ 
 
 
 @auth.post("/login/doc")
@@ -56,13 +49,7 @@ def login_doc(username: str = Form(), password: str = Form()) -> Token:
                 print("error info login")
                 return http_response_code(**rs)
         else:
-            return http_response_code(
-                **message_response(
-                    success=False, info={"message": "error no controlado"}, code=500
-                )
-            )
+            raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Error no controlado")
 
-    except TypeError as e:
-        message_type_error(e)
-    except Exception as e:
-        message_exception_error(e, "error")
+    except (TypeError, Exception)  as e:
+        print(e)

@@ -5,11 +5,11 @@ sys.path.append('..')
 
 import json
 from icecream import ic
-from src.model.authModel import Login
-from src.database.postgredb.db_pg_medoo import Database
-from src.database.postgredb.connect import search_query
-from src.tools.toolsBcript import checkPasswd
-from src.service.tokenService import write_token
+from src.domain.model.auth_model import Login
+from src.infrastructure.database.orm.db_pg_medoo import Database
+from src.infrastructure.database.postgredb.connect import search_query
+from src.utils.bcrypt_utils import verify_password
+from src.infrastructure.security.jwt_handler import JWTHandler
 
 
 def login_controller(data: Login):
@@ -22,6 +22,8 @@ def login_controller(data: Login):
             fields=["password", "email", "created_at"],
             where={"username": data.username},
         )
+        
+        jwt_handler = JWTHandler()
 
         ic(rs)
 
@@ -30,9 +32,9 @@ def login_controller(data: Login):
         # Valid if exist user
         if len(info) > 0:
             # Valid if password it's match
-            if checkPasswd(data.password, info[0].get("password")):
+            if verify_password(data.password, info[0].get("password")):
                 print("creando token")
-                token = write_token(
+                token = jwt_handler.create_token(
                     {
                         "username": data.username,
                         "email": info[0].get("email"),
@@ -87,13 +89,14 @@ def login_doc_controller(username, password):
         rs = db.search("auth.users", "*", where={"username": username}).export("json")
 
         info = json.loads(rs)
+        jwt_handler = JWTHandler()
 
         # Valid if exist user
         if len(info) > 0:
             # Valid if password it's match
-            if checkPasswd(password, info[0].get("password")):
+            if verify_password(password, info[0].get("password")):
                 print("creando token")
-                token = write_token(
+                token = jwt_handler.create_token(
                     {
                         "username": username,
                         "email": info[0].get("email"),

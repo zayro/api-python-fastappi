@@ -1,7 +1,7 @@
 import json
 from fastapi import HTTPException, status, Request
-from infrastructure.redis.redisService import RedisApi
-from src.service.datetimeService import time_to_miliseconds
+from src.infrastructure.redis.redisService import RedisApi
+from src.utils.datetime_utils import time_to_miliseconds
 
 
 def rate_limit(max_requests: int, window: int):
