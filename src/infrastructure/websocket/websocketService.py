@@ -3,46 +3,7 @@
 import traceback
 from datetime import datetime
 from fastapi import WebSocket
-
-
-class ConnectionManager:
-    def __init__(self):
-        """
-        Crea una Lista de WebSocket
-        """
-        self.active_connections: list[WebSocket] = []
-
-    async def connect(self, websocket: WebSocket):
-        """
-        Agrega a la lista los usuarios conectados
-        """
-        await websocket.accept()
-        self.active_connections.append(websocket)
-        print(self.active_connections)
-        print(type(websocket))
-        print(websocket)
-
-    def disconnect(self, websocket: WebSocket):
-        """
-        Elimina a la lista los usuarios conectados
-        """
-        self.active_connections.remove(websocket)
-        print(self.active_connections)
-
-    async def send_personal_message(self, message: str, websocket: WebSocket):
-        await websocket.send_text(message)
-        print(self.active_connections[websocket])
-
-    async def send_personal_message_json(self, message: str, websocket: WebSocket):
-        await websocket.send_json(message)
-
-    async def broadcast(self, message: str):
-        for connection in self.active_connections:
-            await connection.send_text(message)
-
-    async def broadcast_json(self, message: str):
-        for connection in self.active_connections:
-            await connection.send_json(message)
+from src.infrastructure.database.couchdb.db import CouchDBServer
 
 
 """ WebSocket Route Json"""
@@ -56,25 +17,31 @@ class ConnectionWebsocket:
         Crea una Lista de WebSocket
         """
         self.active_connections: dict = {}
+        self.db = CouchDBServer()
 
-    async def connect(self, id_connect: str, time_start: str, websocket: WebSocket):
+    async def connect(self, id_connect: str, time_start: str, websocket: WebSocket) -> None:
         """
         Agrega a la lista los usuarios conectados
         """
-        await websocket.accept()
-        current_user = {
-            "user": f"{id_connect}",
-            "history": [
-                {
-                    "module": "init session",
-                    "time_start": f"{time_start}",
-                }
-            ],
-        }
-        self.active_connections[f"{id_connect}"] = websocket
-        self.users.append(current_user)
+        try:
+            await websocket.accept()
+            current_user: dict = {
+                "user": f"{id_connect}",
+                "history": [
+                    {
+                        "module": "init session",
+                        "time_start": f"{time_start}",
+                    }
+                ],
+            }
+            self.active_connections[f"{id_connect}"] = websocket
+            self.users.append(current_user)
+            self.db.create_document(current_user)
 
-        print("Current User", self.users, "\n")
+            print("Current User", self.users, "\n")
+
+        except Exception as e:
+            print("Error connect", e)
 
     def disconnect(self, id_connect: str):
         """Elimina a la lista los usuarios conectados"""
@@ -82,9 +49,7 @@ class ConnectionWebsocket:
             print("disconnect", id_connect, "\n")
             self.active_connections.pop(f"{id_connect}")
 
-            find_user_discard = self.find_user_discard(
-                find=id_connect, find_by="user", list_dict=self.users
-            )
+            find_user_discard = self.find_user_discard(find=id_connect, find_by="user", list_dict=self.users)
 
             # self.users.clear()
 
@@ -96,9 +61,7 @@ class ConnectionWebsocket:
             print("That item does not exist")
 
     def find_connect(self, find, find_by, list_dict):
-        return_element = [
-            element for element in list_dict if element[f"{find_by}"] == find
-        ]
+        return_element = [element for element in list_dict if element[f"{find_by}"] == find]
         return return_element
 
     def update_user_module(self, find, value):
@@ -111,9 +74,7 @@ class ConnectionWebsocket:
         )
 
     def find_user_discard(self, find, find_by, list_dict):
-        return_element = [
-            element for element in list_dict if element[f"{find_by}"] != find
-        ]
+        return_element = [element for element in list_dict if element[f"{find_by}"] != find]
         return return_element
 
     def delete_user_connect(self, list_dict: list, find_by, find):
@@ -126,9 +87,7 @@ class ConnectionWebsocket:
             print("ingreso al metodo")
             now = datetime.now()
             # Lista comprimida
-            return_new_list = [
-                element for element in self.users if element.get("user") == find
-            ]
+            return_new_list = [element for element in self.users if element.get("user") == find]
 
             if len(return_new_list) != 0:
                 for element in return_new_list:
@@ -140,6 +99,7 @@ class ConnectionWebsocket:
 
                     value["time_start"] = f"{now}"
                     element["history"].append(value)
+                    self.db.update_document_history({"user": element.get("user")}, value)
 
             else:
                 print("lista vacia")
@@ -154,13 +114,9 @@ class ConnectionWebsocket:
             print("error no controlado", e)
             traceback.print_exc()
 
-    def update_user_connect(
-        self, find: str, find_by: str, list_dict: list, value_update, attribute: str
-    ):
+    def update_user_connect(self, find: str, find_by: str, list_dict: list, value_update, attribute: str):
         # Lista comprimida
-        return_new_list = [
-            element for element in list_dict if element.get(find_by) == find
-        ]
+        return_new_list = [element for element in list_dict if element.get(find_by) == find]
 
         if return_new_list:
             for element in return_new_list:

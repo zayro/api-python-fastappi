@@ -9,7 +9,7 @@ indent = space
 indent-size = 4
 
 # Envoltura de texto
-wrap = after
+# wrap = after
 
 # Formato de cadenas
 string-normalization = upper

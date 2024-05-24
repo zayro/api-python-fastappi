@@ -1,13 +1,13 @@
 # main.py
 from datetime import datetime
 from fastapi import APIRouter, WebSocket, WebSocketDisconnect
-from src.infrastructure.websocket.websocketService import ConnectionManager,  ConnectionWebsocket
+from src.infrastructure.websocket.websocketService import ConnectionWebsocket
+from src.infrastructure.websocket.text_websocket import ConnectionManager
 
-# from src.infrastructure.database.couchdb.db import connect_to_couchdb
 
 manager = ConnectionManager()
-connectionWebsocket = ConnectionWebsocket()
 
+connectionWebsocket = ConnectionWebsocket()
 
 socket = APIRouter(prefix="/ws/v1", responses={404: {"description": "Not found"}})
 
@@ -69,9 +69,7 @@ async def websocket_endpoint_json(websocket: WebSocket, client_id: str):
                 await connectionWebsocket.send_private(user_id, user_message)
 
             if update_user is not None:
-                await connectionWebsocket.add_info_connect(
-                    find=client_id, value=update_user
-                )
+                await connectionWebsocket.add_info_connect(find=client_id, value=update_user)
 
     except WebSocketDisconnect:
         connectionWebsocket.disconnect(client_id)

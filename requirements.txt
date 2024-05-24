@@ -24,6 +24,7 @@ psycopg2
 redis
 aioredis
 couchdb
+aiocouch
 #ORM
 sqlalchemy
 medoo
