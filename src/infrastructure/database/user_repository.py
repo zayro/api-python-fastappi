@@ -101,7 +101,7 @@ class UserRepository:
         try:
             query = """
             SELECT id_users, username, email, password
-            FROM auth.users
+            FROM auth.view_privileges
             WHERE username = %s;
             """
             values = (username,)

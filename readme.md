@@ -34,6 +34,10 @@
 
 - pip show fastapi
 
+## Services
+
+- <http://localhost:5984/_utils/#login>
+
 ### Bibliografia
 
 #### Cors

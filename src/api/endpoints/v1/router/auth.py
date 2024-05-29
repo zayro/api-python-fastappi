@@ -26,12 +26,11 @@ def login(data: Login):
                 print("error info login")
                 return http_response_code(**rs)
         else:
-            
+
             raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Error no controlado")
 
-    except (TypeError, Exception)  as e:
+    except (TypeError, Exception) as e:
         print(e)
- 
 
 
 @auth.post("/login/doc")
@@ -51,5 +50,5 @@ def login_doc(username: str = Form(), password: str = Form()) -> Token:
         else:
             raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Error no controlado")
 
-    except (TypeError, Exception)  as e:
+    except (TypeError, Exception) as e:
         print(e)

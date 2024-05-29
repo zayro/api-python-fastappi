@@ -25,24 +25,20 @@ class AuthService:
 
     def verify_password(self, plain_password: str, hashed_password: str) -> bool:
         """Verifica que la contraseña ingresada coincida con la contraseña almacenada."""
-        return bcrypt.checkpw(
-            plain_password.encode("utf-8"), hashed_password.encode("utf-8")
-        )
+        return bcrypt.checkpw(plain_password.encode("utf-8"), hashed_password.encode("utf-8"))
 
     def create_access_token(self, user: User) -> str:
         """Crea un token de acceso JWT para el usuario."""
         payload = {
             "sub": user.id_users,
             "exp": datetime.now() + timedelta(hours=settings.JWT_EXPIRATION_HOURS),
+            "permissions": user.permissions,
+            "username": user.username,
         }
-        token = jwt.encode(
-            payload, settings.JWT_SECRET_KEY, algorithm=settings.JWT_ALGORITHM
-        )
+        token = jwt.encode(payload, settings.JWT_SECRET_KEY, algorithm=settings.JWT_ALGORITHM)
         return token
 
-    def authenticate_and_generate_token(
-        self, username: str, password: str
-    ) -> Optional[str]:
+    def authenticate_and_generate_token(self, username: str, password: str) -> Optional[str]:
         """Autentica al usuario y genera un token de acceso si la autenticación es exitosa."""
         user = self.authenticate_user(username, password)
         if user:

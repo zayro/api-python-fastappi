@@ -28,6 +28,7 @@ def get_user_service() -> UserService:
     return UserService()
 
 
+@user.post("/auth")
 @user.post("/login")
 def auth(auth_credentials: Login, auth_service: AuthService = Depends(get_user_use_service)):
     """

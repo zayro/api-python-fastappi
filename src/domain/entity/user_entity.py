@@ -6,6 +6,7 @@ class User(BaseModel):
     username: str = Field(min_length=3)
     password: str = Field(min_length=6)
     email: EmailStr | None = Field(default=None)
+    permissions: list | None = Field(default=None)
 
 
 class UserLogin(BaseModel):
