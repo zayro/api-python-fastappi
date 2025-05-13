@@ -5,7 +5,6 @@ from src.api.http.httpResponseService import http_response_code
 from src.domain.model.auth_model import Login
 from src.domain.model.token_model import Token
 from src.application.controller.authController import login_controller, login_doc_controller
-from src.api.http.http_json_responses import http_response_code
 
 
 auth = APIRouter(prefix="/api/v1", responses={404: {"description": "Not found"}})

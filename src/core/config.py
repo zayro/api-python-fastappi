@@ -13,7 +13,7 @@ class Settings(BaseModel):
     DEBUG: bool = Field(default=False)
 
     # Configuración de la base de datos
-    DATABASE_URL: str = Field("postgresql://postgres:zayro@localhost/enterprise")
+    DATABASE_URL: str = Field("postgresql://zayro:zayro@localhost/enterprise")
 
     # Configuración de Redis
     REDIS_HOST: str = Field("localhost")

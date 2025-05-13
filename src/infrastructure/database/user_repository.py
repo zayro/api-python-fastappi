@@ -23,7 +23,7 @@ class UserRepository:
                 return conn
             # La conexión se cierra automáticamente al salir del bloque `with`
         except (Exception, psycopg2.DatabaseError, TypeError) as e:
-            print("----- Exception General Database ----- ")
+            print("----- Exception General Database _connect----- ")
             print(
                 type(e).__name__,  # TypeError
                 __file__,  # /tmp/example.py
@@ -55,7 +55,7 @@ class UserRepository:
                     connection.commit()
                     return result
         except (psycopg2.DatabaseError, TypeError) as e:
-            print("----- Exception General Database ----- ")
+            print("----- Exception General Database  _execute_query----- ")
             print(str(e))
             print("---------- ")
 
@@ -71,7 +71,7 @@ class UserRepository:
     def create(self, user: User) -> User:
         """Crea un nuevo usuario en la base de datos."""
         query = """
-        INSERT INTO users (username, email, full_name)
+        INSERT INTO auth.users (username, email, full_name)
         VALUES (%s, %s, %s)
         RETURNING id, username, email, full_name;
         """
@@ -85,7 +85,7 @@ class UserRepository:
         """Obtiene un usuario por su ID de la base de datos."""
         query = """
         SELECT id_users, username, email
-        FROM users
+        FROM auth.users
         WHERE id_users = %s;
         """
         values = (user_id,)
@@ -101,7 +101,7 @@ class UserRepository:
         try:
             query = """
             SELECT id_users, username, email, password
-            FROM auth.view_privileges
+            FROM auth.users
             WHERE username = %s;
             """
             values = (username,)
@@ -112,7 +112,7 @@ class UserRepository:
                 return User(id_users=id_users, username=username, email=email, password=password)
             return None
         except (ValidationError, TypeError) as e:
-            print("----- Exception General Database ----- ")
+            print("----- Exception General Database get_by_username ----- ")
             print(str(e))
 
     def get_all(self) -> List[User]:
@@ -130,13 +130,13 @@ class UserRepository:
                 users.append(user)
             return users
         except (ValidationError, TypeError) as e:
-            print("----- Exception General Database ----- ")
+            print("----- Exception General Database get_all ----- ")
             print(str(e))
 
     def update(self, user: User) -> Optional[User]:
         """Actualiza un usuario existente en la base de datos."""
         query = """
-        UPDATE users
+        UPDATE auth.users
         SET username = %s, email = %s, full_name = %s
         WHERE id = %s
         RETURNING id, username, email, full_name;
@@ -151,7 +151,7 @@ class UserRepository:
     def delete(self, user_id: int) -> bool:
         """Elimina un usuario por su ID de la base de datos."""
         query = """
-        DELETE FROM users
+        DELETE FROM auth.users
         WHERE id = %s;
         """
         values = (user_id,)
@@ -161,12 +161,12 @@ class UserRepository:
     def auth_user(self, login: UserLogin) -> dict:
         """Execute Sql Postgresql"""
         ic(login)
-        sql = """ SELECT email, username, password FROM auth.users WHERE username = %s """
+        sql = """ SELECT email, username, password FROM auth.auth.users WHERE username = %s """
         return self._execute_query(sql, (login.username))
 
     def update_password_user(self, data: UserPasswordChange) -> dict:
 
-        sql = """ UPDATE auth.users SET password = %(newPassword)s  WHERE email = %(email)s  RETURNING email, username """
+        sql = """ UPDATE auth.auth.users SET password = %(newPassword)s  WHERE email = %(email)s  RETURNING email, username """
 
         values = (data.newPassword, data.email)
 
@@ -182,7 +182,7 @@ class UserRepository:
 
                 with conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor) as cur:
 
-                    sql_max_id_field_user = """SELECT MAX(id_users) + 1 as id_users FROM auth.users """
+                    sql_max_id_field_user = """SELECT MAX(id_users) + 1 as id_users FROM auth.auth.users """
 
                     cur.execute(sql_max_id_field_user)
 
@@ -193,7 +193,7 @@ class UserRepository:
                     payload_user.update(execute_max_id_field_user)
 
                     sql_insert_user = (
-                        """INSERT INTO auth.users (id_users, username, password, email) VALUES (%(id_users)s, %(username)s, %(password)s, %(email)s) RETURNING id_users"""
+                        """INSERT INTO auth.auth.users (id_users, username, password, email) VALUES (%(id_users)s, %(username)s, %(password)s, %(email)s) RETURNING id_users"""
                     )
 
                     cur.execute(sql_insert_user, payload_user)
