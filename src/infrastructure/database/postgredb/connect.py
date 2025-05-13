@@ -29,12 +29,13 @@ def connect():
 
         # connecting to the PostgreSQL server
         with psycopg2.connect(
-            host=host, database=database, user=user, password=password
+            host=host,
+            database=database,
+            user=user,
+            password=password
         ) as conn:
             print("Connected to the PostgreSQL server.")
             # Cierra el cursor (no necesario dentro del context manager)
-            # cur.close()
-
             return conn
         # La conexión se cierra automáticamente al salir del bloque `with`
     except (Exception, psycopg2.DatabaseError, TypeError) as e:
@@ -67,25 +68,18 @@ def execute_sql(
         with connect() as conn:
 
             conn.autocommit = autocommit
-            with conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor) as cur:
+            with conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor) as cur:       
                 cur.execute(sql, params)
                 print("The number of result: ", cur.rowcount)
                 json_data = sql_data(cur.fetchall())
-                # ic(json_data)
+                ic(json_data)
                 cur.close()
 
-                return {
-                    "success": True,
-                    "data": json_data,
-                }
+                return json_data
 
     except (psycopg2.DatabaseError, TypeError) as error:
         ic(error)
-        return {
-            "success": False,
-            "message": "Error al ejecutar la consulta",
-            "error": str(error),
-        }
+        raise RuntimeError("An error occurred while executing the execute_sql") from error
 
 
 def max_seq_table(
@@ -113,17 +107,21 @@ def search_query(
     order: Optional[dict] = None,
     limit: Optional[int] = None,
 ):
-    """Retrieve data from the  table"""
+    """Retrieve data from the table"""
 
     sql_tools = SqlTools("pg")
 
-    sql = sql_tools.select(
-        table=query, fields=fields, where=where, order=order, limit=limit
-    )
+    try:
+        print("query", query)
+        sql = sql_tools.select(
+            table=query, fields=fields, where=where, order=order, limit=limit
+        )
+        return execute_sql(sql)
 
-    ic(sql)
-    return execute_sql(sql)
-
+    except (psycopg2.DatabaseError, TypeError) as error:
+        ic(error)
+        raise RuntimeError("An error occurred while executing the search_query") from error
+ 
 
 def insert_query(table: str, data_insert: dict):
     """Insert data from the  table"""

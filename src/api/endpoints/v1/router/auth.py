@@ -18,7 +18,7 @@ def login(data: Login):
         rs = login_controller(data)
         print(rs)
 
-        if type(rs) is dict:
+        if isinstance(rs, dict):
             if rs.get("success") is True:
                 print("enviado info login")
                 return http_response_code(**rs)
@@ -27,11 +27,15 @@ def login(data: Login):
                 return http_response_code(**rs)
         else:
 
-            raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Error no controlado")
+            raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Error no se entraron datos")
 
-    except (TypeError, Exception) as e:
-        print(e)
-
+    except TypeError as error:
+        raise RuntimeError("A TypeError occurred while executing the Route Auth Login") from error
+    except HTTPException as error:
+        raise RuntimeError("An HTTPException occurred while executing the Route Auth Login") from error
+    except Exception as error:
+        raise RuntimeError("An error occurred while executing the Route Auth Login") from error
+ 
 
 @auth.post("/login/doc")
 def login_doc(username: str = Form(), password: str = Form()) -> Token:

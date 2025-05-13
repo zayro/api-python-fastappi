@@ -8,10 +8,12 @@
 
 ## Enviroment
 
-- virtualenv api
-- cd api
+- python -m venv .venv
+- .venv\Scripts\activate.bat
+- pip install -r requirements.txt
+- python.exe -m pip install --upgrade pip
 - 'linux' source bin/activate
-- 'windows' Scripts\activate.bat
+- 'windows' Scripts\activate.bat - .venv\Scripts\activate.bat
 
 ## Version
 
@@ -19,8 +21,10 @@
 
 ### Commands PIP
 
+- pip install virtualenv
 - pip install
 - pip list
+- pip install --upgrade fastapi
 
 ## Launch App
 

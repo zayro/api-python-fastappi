@@ -15,10 +15,11 @@ from src.infrastructure.security.jwt_handler import JWTHandler
 def login_controller(data: Login):
     """Esta Fucion permite Acceder al login ."""
     try:
+        print("ingreso a loginController")
 
         # Search User
         rs = search_query(
-            table="auth.users",
+            query="auth.users",
             fields=["password", "email", "created_at"],
             where={"username": data.username},
         )
@@ -26,8 +27,11 @@ def login_controller(data: Login):
         jwt_handler = JWTHandler()
 
         ic(rs)
+        
+        print(type(rs))
 
-        info = json.loads(rs)
+        #info = json.loads(rs)
+        info = rs
 
         # Valid if exist user
         if len(info) > 0:
@@ -67,16 +71,10 @@ def login_controller(data: Login):
                 "code": 401,
             }
 
-    except Exception as e:
+    except Exception as error:
         print("----- Exception loginController ----- ")
-        print(
-            type(e).__name__,
-            __file__,
-            e,
-        )
-        print(str(e))
-        print("---------- ")
-        return "error"
+        ic(error)
+        raise RuntimeError("An error occurred while executing the login_controller") from error
 
 
 def login_doc_controller(username, password):
