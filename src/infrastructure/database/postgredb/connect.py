@@ -72,14 +72,14 @@ def execute_sql(
                 cur.execute(sql, params)
                 print("The number of result: ", cur.rowcount)
                 json_data = sql_data(cur.fetchall())
-                ic(json_data)
+                #ic(json_data)
                 cur.close()
 
                 return json_data
 
     except (psycopg2.DatabaseError, TypeError) as error:
         ic(error)
-        raise RuntimeError("An error occurred while executing the execute_sql") from error
+        raise RuntimeError("Database error occurred in execute_sql") from error
 
 
 def max_seq_table(
@@ -111,8 +111,7 @@ def search_query(
 
     sql_tools = SqlTools("pg")
 
-    try:
-        print("query", query)
+    try:        
         sql = sql_tools.select(
             table=query, fields=fields, where=where, order=order, limit=limit
         )

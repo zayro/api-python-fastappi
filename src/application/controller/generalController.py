@@ -1,5 +1,6 @@
 """Imports."""
 
+import code
 import json
 
 from pydantic import ValidationError
@@ -46,14 +47,23 @@ def search_controllers(data: Search) -> RequestResponse:
 
         ic(data.model_dump())
 
-        info: dict = search_query(**data.model_dump())
-
+        return_search_query = search_query(**data.model_dump())
+        info = {"data": return_search_query}
         info.update({"code": 200})
-
-        ic(info)
-
+        info.update({"success": True})
+        
         return info
 
     except ValidationError as e:
         ic(e.errors())
         return {"success": False, "info": e.errors(), "code": 422}
+
+    except RuntimeError as e:
+        ic(e)
+        # Manejar el error según sea necesario
+        return {
+            "success": False,
+            "message": "Error while executing search_query",
+            "error": str(e),
+            "code": 500,
+        }

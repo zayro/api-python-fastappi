@@ -47,3 +47,7 @@
 #### Cors
 
 - <https://www.slingacademy.com/article/fastapi-allowing-requests-from-other-origins-cors/>
+
+#### Api - Test
+
+- <https://documenter.getpostman.com/view/473681/2sB2qah1ao#261202a3-efb4-4627-8193-57db99b14a49> 

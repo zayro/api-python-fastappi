@@ -15,7 +15,6 @@ from datetime import datetime
 
 # Routes
 from src.api.endpoints.v1.router.auth import auth
-from src.api.endpoints.v1.router.user import user
 from src.api.endpoints.v1.router.general import general
 from src.api.endpoints.v1.router.query import query
 from src.api.endpoints.v1.router.view import view
@@ -110,12 +109,9 @@ async def http_exception_handler(request, exc):
     )
 
 
-"""
-* Routes of project
-"""
+# Routes of project
 
 app.include_router(auth)
-app.include_router(user)
 app.include_router(general)
 app.include_router(view)
 app.include_router(query)
