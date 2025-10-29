@@ -30,6 +30,10 @@ from src.api.endpoints.v1.router.email import email
 from src.api.endpoints.v1.router.validacion_correo import validacion_correo
 from src.api.endpoints.v1.router.validacion_rostro import rostro
 
+from dotenv import load_dotenv
+
+load_dotenv()
+
 # INIT APP
 app = FastAPI()
 

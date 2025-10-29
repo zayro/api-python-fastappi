@@ -1,3 +1,4 @@
+import os
 from fastapi import APIRouter, BackgroundTasks, HTTPException
 from pydantic import BaseModel, EmailStr
 import smtplib
@@ -7,11 +8,11 @@ import time
 from datetime import datetime, timedelta
 from mailjet_rest import Client
 
-
-MAILJET_API_KEY = "36e156533ba9e601bc0e974ed38d6119"
-MAILJET_API_SECRET = "b21c5198b6bc540ce3a356835de023c5"
-MAILJET_FROM_EMAIL = "zayro8905@gmail.com"
-MAILJET_FROM_NAME = "Mi App"
+# Mailjet: leer de variables de entorno
+MAILJET_API_KEY = os.getenv("MAILJET_API_KEY")
+MAILJET_API_SECRET = os.getenv("MAILJET_API_SECRET")
+MAILJET_FROM_EMAIL = os.getenv("MAILJET_FROM_EMAIL", "zayro8905@gmail.com")
+MAILJET_FROM_NAME = os.getenv("MAILJET_FROM_NAME", "Mi App")
 
 
 email = APIRouter(prefix="/api/v1/email", responses={404: {"description": "Not found"}})
@@ -27,10 +28,10 @@ class EmailSchema(BaseModel):
     body: str
 
 
-SMTP_SERVER = "smtp.gmail.com"
-SMTP_PORT = 587
-SMTP_USER = "zayro8905@gmail.com"
-SMTP_PASSWORD = "dwllaiexubaojtev"
+SMTP_SERVER = os.getenv("SMTP_SERVER", "smtp.gmail.com")
+SMTP_PORT = int(os.getenv("SMTP_PORT", 587))
+SMTP_USER = os.getenv("SMTP_USER", "zayro8905@gmail.com")
+SMTP_PASSWORD = os.getenv("SMTP_PASSWORD")
 
 
 def generate_verification_code():
