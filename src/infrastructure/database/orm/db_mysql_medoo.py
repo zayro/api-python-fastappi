@@ -1,0 +1,76 @@
+"""Imports."""
+
+import sys
+from medoo import Medoo
+
+
+class Database:
+    """Class representing a Database with Framework"""
+
+    def __init__(self):
+        print("Init DB")
+        try:
+            self.conn = Medoo(
+                dbtype="mysql",
+                user="root",
+                password="zayro",
+                host="localhost",
+                database="access_gu",
+                port=3306,
+                logging=True,
+            )
+        except TypeError as e:
+            print("----- TypeError General Database ----- ")
+            print(str(e))
+            print("---------- ")
+        except Exception as e:
+            print("----- Exception General Database ----- ")
+            print(
+                type(e).__name__,  # TypeError
+                __file__,  # /tmp/example.py
+                e.__traceback__.tb_lineno,  # 2
+            )
+            print(str(e))
+            print("---------- ")
+            sys.exit()
+
+    # Calling destructor
+    def __del__(self):
+        print("Destructor Database.db called")
+        self.conn.close()
+
+    def select(self, table, field="*"):
+        rs = self.conn.select(table, field)
+        print(rs.export("json"))
+        return rs.export("json")
+
+    def search(self, table, fields, where=None):
+
+        if type(fields) is list:
+            field = ", ".join(fields)
+        else:
+            field = fields
+
+        if where is not None and type(where) is dict:
+            condition = where
+
+        else:
+            condition = None
+
+        return self.conn.select(table, field, condition)
+
+    def query(self, stm):
+        rs = self.conn.query(stm, commit=True)
+        # print(rs.export("json"))
+        return rs
+
+    def log(self):
+        rs = self.conn.log()
+        print(rs)
+
+    def error(self):
+        rs = self.conn.error()
+        print(rs)
+
+    def close(self):
+        self.conn.close()

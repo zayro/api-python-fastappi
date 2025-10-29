@@ -1,10 +1,14 @@
 """Imports."""
 
-from fastapi import  APIRouter, Request
- 
+from fastapi import APIRouter, Request
+
 from src.api.http.httpResponseService import http_response_code
-from src.application.controller.queryController import ( query_prueba, query_prueba_redis, query_prueba_cache,)
-from src.application.controller.cacheController import query_rate_limit, query_cache_limit
+from src.application.v1.controller.queryController import (
+    query_prueba,
+    query_prueba_redis,
+    query_prueba_cache,
+)
+from src.application.v1.controller.cacheController import query_rate_limit, query_cache_limit
 from src.api.http.http_exceptions import http_exception_general
 
 
@@ -44,7 +48,7 @@ async def get_cache_redis():
             else:
                 return http_response_code(**rs)
         else:
-           return http_exception_general("Error no controlado")
+            return http_exception_general("Error no controlado")
 
     except (TypeError, Exception) as e:
         print("TypeError ---------------", e)
@@ -63,7 +67,6 @@ async def get_query_prueba_redis():
                 return http_response_code(**rs)
         else:
             return http_exception_general("Error no controlado")
-            
 
     except (TypeError, Exception) as e:
         print("TypeError ---------------", e)

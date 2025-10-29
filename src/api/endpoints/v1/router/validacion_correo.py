@@ -5,16 +5,9 @@ from email.mime.text import MIMEText
 import secrets
 import time
 from datetime import datetime, timedelta
-from mailjet_rest import Client
 
 
-MAILJET_API_KEY = "36e156533ba9e601bc0e974ed38d6119"
-MAILJET_API_SECRET = "b21c5198b6bc540ce3a356835de023c5"
-MAILJET_FROM_EMAIL = "zayro8905@gmail.com"
-MAILJET_FROM_NAME = "Mi App"
-
-
-email = APIRouter(prefix="/api/v1/email", responses={404: {"description": "Not found"}})
+validacion_correo = APIRouter(prefix="/api/v1/validacion_correo", tags=["validacion_correo"], responses={404: {"description": "Not found"}})
 
 # Para este ejemplo, usaremos un diccionario en memoria para almacenar los códigos.
 # En un entorno de producción, deberías usar una base de datos o caché como Redis.
@@ -37,47 +30,6 @@ def generate_verification_code():
     return secrets.token_hex(4)  # Genera un código hexadecimal de 8 caracteres
 
 
-def send_email_mailjet(email: EmailSchema, verification_code: str):
-    """Envía el email usando Mailjet (v3.1)."""
-    try:
-        mailjet = Client(auth=(MAILJET_API_KEY, MAILJET_API_SECRET), version="v3.1")
-        data = {
-            "Messages": [
-                {
-                    "From": {"Email": MAILJET_FROM_EMAIL, "Name": MAILJET_FROM_NAME},
-                    "To": [{"Email": email.email, "Name": email.email}],
-                    "Subject": email.subject,
-                    "TextPart": f"{email.body}\n\nCódigo de verificación: {verification_code}",
-                    "HTMLPart": f"<p>{email.body}</p><p><b>Código de verificación:</b> {verification_code}</p>",
-                }
-            ]
-        }
-        result = mailjet.send.create(data=data)
-        status = result.status_code if hasattr(result, "status_code") else result.get("Status")
-        if int(status) >= 400:
-            raise Exception(f"Mailjet error: {result.status_code} {result.json() if hasattr(result, 'json') else result}")
-    except Exception as e:
-        # No lanzar HTTPException desde el hilo de background; loggear o relanzar si se usa directamente
-        raise
-
-
-@email.post("/send-verification-email-mailjet")
-def send_verification_email_mailjet(email: EmailSchema):
-    """
-    Genera código y envía el email en background usando Mailjet.
-    """
-    try:
-        verification_code = generate_verification_code()
-        expiration_time = datetime.utcnow() + timedelta(minutes=30)
-        verification_codes[email.email] = {"code": verification_code, "expiration": expiration_time}
-
-        email.body = f"Este es tu código de verificación. Expira en 30 minutos."
-
-        return {"message": "Email de verificación enviado en segundo plano (Mailjet)"}
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
-
-
 def send_email(email: EmailSchema, verification_code: str):
     msg = MIMEText(email.body + f"\n\nCódigo de verificación: {verification_code}")
     msg["Subject"] = email.subject
@@ -93,7 +45,13 @@ def send_email(email: EmailSchema, verification_code: str):
         raise HTTPException(status_code=500, detail=str(e))
 
 
-@email.post("/send-verification-email/")
+@validacion_correo.post("/demo")
+async def send_verification():
+
+    return {"message": "Email de verificación enviado en segundo plano"}
+
+
+@validacion_correo.post("/send-verification-email/")
 async def send_verification_email(email: EmailSchema, background_tasks: BackgroundTasks):
     verification_code = generate_verification_code()
     expiration_time = datetime.utcnow() + timedelta(minutes=30)  # Código expira en 30 minutos
@@ -109,7 +67,7 @@ class VerificationRequest(BaseModel):
     code: str
 
 
-@email.post("/verify-email/")
+@validacion_correo.post("/verify-email/")
 async def verify_email(verification_request: VerificationRequest):
     email = verification_request.email
     code = verification_request.code

@@ -1,9 +1,12 @@
 # Module Imports
 import mariadb
+from typing import Optional
+from src.utils.sql_utils import SqlTools
+from src.infrastructure.log.logService import ic
 
 
 def convert_string_quotes(value: tuple):
-    print('**************', value)
+    print("**************", value)
     return " = ".join('"%s"' % i for i in value)
 
 
@@ -19,7 +22,7 @@ def values_dict(data: list[dict]):
             response += f'"{data}", '
         response += f")"
 
-    response = response.replace(", )", '),')
+    response = response.replace(", )", "),")
     response = response[:-1]
 
     return response
@@ -28,52 +31,61 @@ def values_dict(data: list[dict]):
 class Database:
 
     cursor: mariadb.Cursor
-    conn: mariadb.ConnectionPool    
+    conn: mariadb.ConnectionPool
 
-  
-    def __init__(self, db):
-        
-        print("Init DB")
-        self.db =  db
-        self.conn = mariadb.ConnectionPool(
-        pool_name = self.db,
-        pool_size = 2,
-        pool_reset_connection = True,
-        host='127.0.0.1',
-        user='root',
-        password='zayro',
-        port=3306,
-        database = self.db,
-        )     
-                    
-        # Connect to MariaDB Platform
-                  
+    def __init__(self, db_name):
+
+        try:
+
+            print("Init DB")
+            self.db_name = db_name
+            self.pool_name = f"{db_name}_pool"
+
+            # self.conn = mariadb.ConnectionPool(pool_name=self.db, pool_size=2, pool_reset_connection=True, host="127.0.0.1", user="root", password="zayro", port=3306, database=self.db)
+
+            # Connect to MariaDB Platform
+
+            self.conn = mariadb.ConnectionPool(
+                pool_name=self.pool_name,
+                pool_size=2,
+                pool_reset_connection=True,
+                host="127.0.0.1",
+                user="marlon3013199303",
+                password="zayro3013199303",
+                port=3307,
+                database=self.db_name,
+            )
+        except mariadb.PoolError as e:
+            print(f"Error connecting to MariaDB Platform: {e}")
+            self.conn.close()
+        except mariadb.DatabaseError as e:
+            print(f"Error connecting to MariaDB Platform: {e}")
+            self.conn.close()
 
     def __del__(self):
-        print('Destructor called')
+        print("Destructor called")
+        self.conn.close()
 
-        
-    def connectar(self):       
-        try: 
-            #conn.autocommit = True
+    def connectar(self):
+        try:
+            # conn.autocommit = True
 
             conn = self.conn.get_connection()
-            print('Conected Successfuly')  
-            self.cursor =  conn.cursor()        
-            return  self.cursor 
-            
-        except mariadb.PoolError  as e:
-            print(f"Error connecting to MariaDB Platform: {e}")    
+            print("Conected Successfuly")
+            self.cursor = conn.cursor()
+            return self.cursor
+
+        except mariadb.PoolError as e:
+            print(f"Error connecting to MariaDB Platform: {e}")
             conn.close()
         except mariadb.DatabaseError:
-            print("The database has gone away -- reconnecting.")  
+            print("The database has gone away -- reconnecting.")
             conn.close()
         finally:
-            print("finally Connect Db.")  
-            conn.close()        
-        
+            print("finally Connect Db.")
+            conn.close()
 
-    def get_results(self): 
+    def get_results(self):
         desc = [d[0] for d in self.cursor.description]
         results = [dict(zip(desc, res)) for res in self.cursor.fetchall()]
         return results
@@ -87,23 +99,23 @@ class Database:
             # raise Exception("Error Sql")
             return False
 
-    def execute(self,  sql: str, params: tuple = ()):
+    def execute(self, sql: str, params: tuple = ()):
         try:
             self.cursor.execute(sql, params)
             if self.cursor.rowcount > 0:
                 result = self.cursor.fetchall()
                 self.cursor.close()
                 self.conn.close()
-                return result 
-            else: 
+                return result
+            else:
                 return None
-            
+
         except mariadb.Error as e:
             print(f"Error: {e}")
             self.conn.close()
             return None
 
-    def query(self,  sql: str, params: tuple = ()):
+    def query(self, sql: str, params: tuple = ()):
         try:
             self.cursor.execute(sql, params)
             return self.get_results()
@@ -114,7 +126,7 @@ class Database:
 
     def search(self, FIELDS, FROM: str, WHERE=None):
 
-        str_fields = ','.join(map(str, FIELDS))
+        str_fields = ",".join(map(str, FIELDS))
 
         # convert_where = [" = ".join(map(convert_string_quotes, item)) for item in list(WHERE.items())]
 
@@ -122,10 +134,10 @@ class Database:
             parse_text: str = ""
             for k, v in WHERE.items():
                 if isinstance(v, str):
-                    parse_text += k + ' = ' + f"'{v}'" + ' AND '
+                    parse_text += k + " = " + f"'{v}'" + " AND "
                 else:
-                    parse_text += k + ' = ' + f"{v}" + ' AND '
-            str_where = parse_text.rsplit(' AND ', 1)[0]
+                    parse_text += k + " = " + f"{v}" + " AND "
+            str_where = parse_text.rsplit(" AND ", 1)[0]
             sql = f"SELECT {str_fields} FROM {FROM} WHERE {str_where} "
             print(sql)
             response = self.query(sql, ())
@@ -150,3 +162,29 @@ class Database:
             print(f"Error: {e}")
             # raise Exception("Error Sql")
             return [False, f"Error: {e}"]
+
+    def search_query(
+        self,
+        query: str,
+        fields: list,
+        where: Optional[dict] = None,
+        order: Optional[dict] = None,
+        limit: Optional[int] = None,
+    ):
+        """Retrieve data from the table"""
+
+        sql_tools = SqlTools("mysql")
+
+        try:
+
+            sql = sql_tools.select(table=query, fields=fields, where=where, order=order, limit=limit)
+            conn = self.conn.get_connection()
+            print("Conected Successfuly")
+            cursor = conn.cursor(dictionary=True)
+
+            cursor.execute(sql)
+            return cursor.fetchall()
+
+        except (mariadb.Error, TypeError) as error:
+            ic(error)
+            raise RuntimeError("An error occurred while executing the search_query") from error

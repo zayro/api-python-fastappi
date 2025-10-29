@@ -4,7 +4,7 @@ from fastapi import Depends, APIRouter, Response
 
 from src.api.http.httpResponseService import http_response_code
 
-from src.application.controller.queryController import query_prueba, query_prueba_redis, query_prueba_cache
+from src.application.v1.controller.queryController import query_prueba, query_prueba_redis, query_prueba_cache
 
 from starlette.requests import Request
 

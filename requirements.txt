@@ -43,3 +43,9 @@ orjson
 fastapi_etag
 #logs
 icecream
+cmake
+dlib
+face_recognition
+pillow
+setuptools
+wheel

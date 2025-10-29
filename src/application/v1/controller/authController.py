@@ -1,7 +1,7 @@
-""" 
+"""
 import sys
 sys.path.append('..')
- """
+"""
 
 import json
 from icecream import ic
@@ -23,14 +23,14 @@ def login_controller(data: Login):
             fields=["password", "email", "created_at"],
             where={"username": data.username},
         )
-        
+
         jwt_handler = JWTHandler()
 
         ic(rs)
-        
+
         print(type(rs))
 
-        #info = json.loads(rs)
+        # info = json.loads(rs)
         info = rs
 
         # Valid if exist user

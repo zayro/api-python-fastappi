@@ -1,5 +1,6 @@
 """RUN API PROJECT."""
 
+import os
 import uvicorn
 from fastapi import Body, FastAPI, HTTPException, Request, Response, Request, status
 from fastapi.exceptions import RequestValidationError
@@ -15,7 +16,9 @@ from datetime import datetime
 
 # Routes
 from src.api.endpoints.v1.router.auth import auth
+from src.api.endpoints.v2.router.auth import authMb
 from src.api.endpoints.v1.router.general import general
+from src.api.endpoints.v2.router.general import generalMb
 from src.api.endpoints.v1.router.query import query
 from src.api.endpoints.v1.router.view import view
 from src.api.endpoints.v1.router.cache import cache
@@ -23,6 +26,9 @@ from src.api.endpoints.v1.router.pdf import pdf
 from src.api.endpoints.v1.router.upload import upload
 from src.api.endpoints.v1.router.files import files
 from src.api.endpoints.v1.router.webSocket import socket
+from src.api.endpoints.v1.router.email import email
+from src.api.endpoints.v1.router.validacion_correo import validacion_correo
+from src.api.endpoints.v1.router.validacion_rostro import rostro
 
 # INIT APP
 app = FastAPI()
@@ -47,6 +53,12 @@ add_exception_handler(app)
 
 
 @app.middleware("http")
+async def debug_origin(request: Request, call_next):
+    print("Origin:", request.headers.get("origin"))
+    return await call_next(request)
+
+
+@app.middleware("http")
 async def add_cache_headers(request: Request, call_next) -> Response:
     start_time = time.time()
     response = await call_next(request)
@@ -55,19 +67,7 @@ async def add_cache_headers(request: Request, call_next) -> Response:
     return response
 
 
-origins = [
-    "http://localhost",
-    "http://localhost:8080",
-    "http://localhost:5173",
-]
-
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=origins,
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
+app.add_middleware(CORSMiddleware, allow_origins=["*"], allow_credentials=False, allow_methods=["*"], allow_headers=["*"])
 
 
 @app.on_event("startup")
@@ -112,14 +112,19 @@ async def http_exception_handler(request, exc):
 # Routes of project
 
 app.include_router(auth)
+app.include_router(authMb)
 app.include_router(general)
+app.include_router(generalMb)
 app.include_router(view)
-app.include_router(query)
-app.include_router(cache)
+# app.include_router(query)
+# app.include_router(cache)
 app.include_router(pdf)
 app.include_router(upload)
 app.include_router(files)
-app.include_router(socket)
+app.include_router(email)
+app.include_router(validacion_correo)
+app.include_router(rostro)
+# app.include_router(socket)
 
 
 @app.get("/")

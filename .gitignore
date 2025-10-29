@@ -166,3 +166,4 @@ log.txt
 # Upload Folder
 
 public/files/**
+public/imagenes_con_rostro/**
